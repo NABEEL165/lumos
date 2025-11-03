@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sold Products - Lumoskart</title>
+    <style>
+        :root {
+            --primary-black: #000000;
+            --secondary-black: #1a1a1a;
+            --dark-grey: #333333;
+            --medium-grey: #666666;
+            --light-grey: #cccccc;
+            --bg-grey: #f5f5f5;
+            --white: #ffffff;
+            --border-grey: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-grey);
+            background-color: var(--bg-grey);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: var(--primary-black);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-item a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-item a:hover {
+            background-color: var(--dark-grey);
+        }
+
+        .nav-item a.active {
+            background-color: var(--white);
+            color: var(--primary-black);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex: 1;
+        }
+
+        .products-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .products-header {
+            background-color: var(--secondary-black);
+            color: var(--white);
+            padding: 2rem;
+            border-bottom: 3px solid var(--primary-black);
+        }
+
+        .products-header h2 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .products-content {
+            padding: 2rem;
+        }
+
+        /* Sold Products List */
+        .products-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-item {
+            background-color: var(--white);
+            border: 1px solid var(--border-grey);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .product-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border-color: var(--dark-grey);
+        }
+
+        .product-img-container {
+            height: 220px;
+            overflow: hidden;
+            background-color: var(--bg-grey);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-grey);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+        }
+
+        .product-item:hover .product-img {
+            transform: scale(1.05);
+        }
+
+        .product-details {
+            padding: 1.5rem;
+        }
+
+        .product-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary-black);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .product-info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--bg-grey);
+        }
+
+        .product-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--medium-grey);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--primary-black);
+            font-size: 1rem;
+        }
+
+        .info-value.price {
+            color: var(--primary-black);
+            font-size: 1.25rem;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 3rem 2rem;
+            background-color: var(--bg-grey);
+            border-radius: 8px;
+            color: var(--medium-grey);
+            font-size: 1.1rem;
+            border: 1px dashed var(--light-grey);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--primary-black);
+            color: var(--white);
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--light-grey);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--white);
+        }
+
+        /* Tablet Responsive */
+        @media (max-width: 1024px) {
+            .products-list {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .logo img {
+                height: 28px;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .nav-item a {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .container {
+                margin: 1rem auto;
+                padding: 0 1rem;
+            }
+
+            .products-header {
+                padding: 1.5rem;
+            }
+
+            .products-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .products-content {
+                padding: 1.5rem;
+            }
+
+            .products-list {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
+
+            .product-img-container {
+                height: 200px;
+            }
+
+            .product-details {
+                padding: 1.25rem;
+            }
+
+            .product-name {
+                font-size: 1rem;
+            }
+
+            .no-products {
+                padding: 2rem 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0.75rem;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            .nav-menu {
+                gap: 0.5rem;
+            }
+
+            .nav-item a {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.85rem;
+            }
+
+            .products-header {
+                padding: 1.25rem;
+            }
+
+            .products-header h2 {
+                font-size: 1.35rem;
+            }
+
+            .products-content {
+                padding: 1rem;
+            }
+
+            .product-img-container {
+                height: 180px;
+            }
+
+            .product-details {
+                padding: 1rem;
+            }
+
+            .product-name {
+                font-size: 0.95rem;
+            }
+
+            .info-label {
+                font-size: 0.85rem;
+            }
+
+            .info-value {
+                font-size: 0.9rem;
+            }
+
+            .info-value.price {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="{% static 'accounts/images/lumoskart-logo.png' %}" alt="Lumoskart Logo" style="height: 32px; width: auto; margin-right: 10px;">
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="{% url 'home' %}">Home</a></li>
+                <li class="nav-item"><a href="{%url 'influencer_dashboard'%}" class="active">Dashboard</a></li>
+                <li class="nav-item"><a href="{%url 'profile'%}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="products-card">
+            <div class="products-header">
+                <h2>Sold Products</h2>
+            </div>
+
+            <div class="products-content">
+                {% if sold_products %}
+                    <ul class="products-list">
+                        {% for item in sold_products %}
+                            <li class="product-item">
+                                <div class="product-img-container">
+                                    <img class="product-img" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                </div>
+                                <div class="product-details">
+                                    <div class="product-name">{{ item.product.name }}</div>
+                                    <div class="product-info">
+                                        <div class="product-info-item">
+                                            <span class="info-label">Quantity Sold:</span>
+                                            <span class="info-value">{{ item.quantity }}</span>
+                                        </div>
+                                        <div class="product-info-item">
+                                            <span class="info-label">Total Sale:</span>
+                                            <span class="info-value price">${{ item.total }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="no-products">
+                        <p>You have not sold any products yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Lumoskart. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
