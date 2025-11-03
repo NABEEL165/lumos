@@ -1,5 +1,4 @@
-
-    <!DOCTYPE html>
+<!DOCTYPE html>
 {% load static %}
 <html lang="en">
 <head>
@@ -1126,21 +1125,24 @@
                         <button type="submit" style="border-radius: 20px; background: none; border: none; padding: 8px; cursor: pointer;">
                             <i class="bi bi-search" style="font-size: 20px; color: #6c757d;"></i>
                         </button>
-                        <input type="text" name="q" class="form-control search-bar" placeholder="Who’s your favorite influencer" value="{{ request.GET.q|default:'' }}" required>
+                        <input type="text" name="q" class="form-control search-bar" placeholder="Search influencers or products..." value="{{ request.GET.q|default:'' }}" required>
                         {% if request.GET.q %}
                             <a href="{% url 'home' %}" class="btn btn-outline-secondary" style="border-radius: 20px;">Clear</a>
                         {% endif %}
                     </form>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Navigation Links - With Language Selection -->
                 <div class="ms-auto d-flex align-items-center">
-                    <ul class="navbar-nav me-3">
-                        <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'about_us' %}">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Support</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
-                    </ul>
+                    <div class="dropdown me-3">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-globe"></i> <span id="currentLanguage">English</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="en">English</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="ar">Arabic</a></li>
+                        </ul>
+                    </div>
                     <a href="{% url 'register_customer' %}" class="btn btn-signup me-2">Sign up</a>
                     <a href="{% url 'login' %}" class="btn btn-login">Log in</a>
                 </div>
@@ -1163,10 +1165,24 @@
                 <li class="nav-item"><a class="nav-link" href="#">Support</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Order Tracking</a></li>
+                <!-- Moved Premium option here as a sub-section under Sign Up -->
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="fas fa-shopping-cart"></i> Cart
+                    <a class="nav-link" href="{% url 'register_influencer' %}">Sign up as an Influencer</a>
+                    <ul class="nav flex-column ms-4">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Premium</a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Language Selection in Mobile Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="mobileLanguageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-globe"></i> <span id="mobileCurrentLanguage">English</span>
                     </a>
+                    <ul class="dropdown-menu" aria-labelledby="mobileLanguageDropdown">
+                        <li><a class="dropdown-item lang-option" href="#" data-lang="en">English</a></li>
+                        <li><a class="dropdown-item lang-option" href="#" data-lang="ar">Arabic</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'register_customer' %}">Sign up</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Log in</a></li>
@@ -1277,9 +1293,14 @@
                                             <p class="product-influencer">by {{ product.influencer.get_full_name|default:product.influencer.username }}</p>
                                             <div class="product-footer">
                                                 <span class="product-price">₹{{ product.price }}</span>
-                                                <button class="add-to-cart" data-product-id="{{ product.id }}">
-                                                    <i class="bi bi-bag-plus"></i>
-                                                </button>
+                                                <div>
+                                                    <button class="add-to-cart me-2" data-product-id="{{ product.id }}">
+                                                        <i class="bi bi-bag-plus"></i>
+                                                    </button>
+                                                    <button class="buy-now" data-product-id="{{ product.id }}">
+                                                        <i class="bi bi-bag-check"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1375,7 +1396,8 @@
     <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        // Handle Add to Cart and Buy Now buttons
+        document.addEventListener('DOMContentLoaded', function() {
             // Influencers Swiper
             const influencersSwiper = new Swiper(".influencers-swiper", {
                 slidesPerView: 2,
@@ -1418,6 +1440,44 @@
                     768: { slidesPerView: 2, spaceBetween: 20 },
                     992: { slidesPerView: 2.5, spaceBetween: 20 },
                     1200: { slidesPerView: 3, spaceBetween: 20 }
+                }
+            });
+
+            // Handle language selection
+            const languageItems = document.querySelectorAll('.lang-option');
+            languageItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const selectedLang = this.getAttribute('data-lang');
+                    const languageName = selectedLang === 'en' ? 'English' : 'Arabic';
+                    
+                    // Update the displayed language in both desktop and mobile
+                    document.getElementById('currentLanguage').textContent = languageName;
+                    document.getElementById('mobileCurrentLanguage').textContent = languageName;
+                    
+                    // Add visual feedback
+                    this.closest('.dropdown-menu').previousElementSibling.classList.add('btn-success');
+                    setTimeout(() => {
+                        this.closest('.dropdown-menu').previousElementSibling.classList.remove('btn-success');
+                    }, 1000);
+                    
+                    // In a real implementation, you would:
+                    // 1. Set a language cookie or session variable
+                    // 2. Redirect to the same page with the language parameter
+                    // 3. Or use AJAX to dynamically change the content
+                });
+            });
+            
+            // Handle button clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.add-to-cart')) {
+                    // Redirect to login page when Add to Cart is clicked
+                    window.location.href = '{% url "login" %}';
+                }
+                
+                if (e.target.closest('.buy-now')) {
+                    // Redirect to login page when Buy Now is clicked
+                    window.location.href = '{% url "login" %}';
                 }
             });
         });
@@ -1490,3 +1550,4 @@
     </script>
 </body>
 </html>
+    
