@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Product </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #000000;
+            --secondary: #1a1a1a;
+            --accent: #333333;
+            --light: #f8f9fa;
+            --dark: #000000;
+            --gray: #cccccc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background-color: var(--primary);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: block;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--gray);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            margin: 0 0 1.5rem 0;
+            color: var(--primary);
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        /* Form Styles */
+        .product-form p {
+            margin-bottom: 1.5rem;
+        }
+
+        .product-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .product-form input[type="text"],
+        .product-form input[type="number"],
+        .product-form input[type="email"],
+        .product-form input[type="url"],
+        .product-form select,
+        .product-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background-color: white;
+        }
+
+        .product-form input[type="text"]:focus,
+        .product-form input[type="number"]:focus,
+        .product-form input[type="email"]:focus,
+        .product-form input[type="url"]:focus,
+        .product-form select:focus,
+        .product-form textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-form textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Checkbox styling */
+        .product-form input[type="checkbox"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2);
+            accent-color: var(--primary);
+        }
+
+        /* File upload */
+        .product-form input[type="file"] {
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+            border: 1px dashed #ddd;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Help text */
+        .product-form .helptext {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Error messages */
+        .product-form .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0;
+            color: #e74c3c;
+            font-size: 0.9rem;
+        }
+
+        /* Submit Button */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--gray);
+            color: #000000;
+        }
+
+        .btn-primary:hover {
+            background-color: #999999;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Form actions */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-link i {
+            margin-right: 0.3rem;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        /* Field required indicator */
+        .required-field label:after {
+            content: "*";
+            color: var(--accent);
+            margin-left: 0.25rem;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Mobile Responsive Styles */
+        @media screen and (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .navbar-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .logo {
+                margin-bottom: 1rem;
+            }
+
+            .logo img {
+                height: 35px;
+            }
+
+            .logo-text {
+                font-size: 1.3rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .nav-links li {
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+                width: 100%;
+            }
+
+            .nav-links a {
+                padding: 0.75rem 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .container {
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+                border-radius: 6px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .product-form input[type="text"],
+            .product-form input[type="number"],
+            .product-form input[type="email"],
+            .product-form input[type="url"],
+            .product-form select,
+            .product-form textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .back-link,
+            .btn {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+
+            .btn {
+                margin-top: 0.5rem;
+            }
+
+            .footer {
+                padding: 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .navbar {
+                padding: 0.75rem;
+            }
+
+            .logo img {
+                height: 30px;
+            }
+
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .form-container {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                padding: 0.65rem 1.25rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Tablet Styles */
+        @media screen and (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                max-width: 90%;
+            }
+
+            .navbar-container {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Desktop Large Screens */
+        @media screen and (min-width: 1200px) {
+            .navbar-container {
+                max-width: 1400px;
+            }
+
+            .container {
+                max-width: 900px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <img src="{% static 'accounts/images/lumoskart-logo.png' %}" alt="GreenStore Logo">
+<!--                <span class="logo-text">Lumoskart</span>-->
+            </div>
+            <ul class="nav-links">
+                <li><a href="{%url 'home'%}">Home</a></li>
+                <li><a href="{%url 'influencer_product_list'%}">Products</a></li>
+               <li>
+    <a href="#" id="add-category-link" class="nav-link">Category</a>
+</li>
+
+                <li><a href="{%url 'influencer_dashboard'%}">Dashboard</a></li>
+                <li><a href="{%url 'logout'%}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="form-container">
+            <h2 class="page-title">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Product</h2>
+
+            <form method="post" enctype="multipart/form-data" class="product-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <div class="form-actions">
+                    <a href="javascript:history.back()" class="back-link">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 GreenStore. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.getElementById("add-category-link").addEventListener("click", function (event) {
+    event.preventDefault();
+
+    fetch("{% url 'add_category' %}")
+        .then(response => response.text())
+        .then(html => {
+            Swal.fire({
+                title: 'Add Category',
+                html: html,
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                focusConfirm: false,
+                background: getComputedStyle(document.documentElement).getPropertyValue('--light-color'),
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-dark'),
+                confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'),
+                cancelButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color'),
+                customClass: {
+                    popup: 'rounded-2xl shadow-lg',
+                    confirmButton: 'rounded-md px-4 py-2 font-semibold',
+                    cancelButton: 'rounded-md px-4 py-2 font-semibold',
+                },
+                preConfirm: () => {
+                    const form = document.querySelector('.swal2-container form');
+                    const formData = new FormData(form);
+                    return fetch("{% url 'add_category' %}", {
+                        method: "POST",
+                        headers: {
+                            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Failed to save");
+                        return response.text();
+                    })
+                    .then(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Category Added!',
+                            text: 'The new category has been saved successfully.',
+                            confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary-color'),
+                        }).then(() => {
+                            // 🔄 Auto-refresh page after saving
+                            location.reload();
+                        });
+                    })
+                    .catch(() => {
+                        Swal.fire('Error', 'Could not save category.', 'error');
+                    });
+                }
+            });
+        });
+});
+</script>
+
+
+
+
+</html>
