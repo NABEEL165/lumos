@@ -3,25 +3,38 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from django.db.models import Sum, F, Q
+from django.db.models import  Q
 from django.utils.timezone import now
 from .forms import InfluencerRegisterForm, CustomerRegisterForm, InfluencerProfileForm
 from .models import CustomUser, InfluencerProfile, InfluencerVideo
-from products.models import Category, Product
-from orders.models import OrderItem
+
+try:
+    from product.models import Category, Product
+except ModuleNotFoundError:
+    from products.models import Category, Product
 
 
-
+def django_success_page(request):
+    return render(request, 'django_success.html')
 
 
 def home_view(request):
-    categories = Category.objects.all()
-    influencers = CustomUser.objects.filter(user_type='influencer')
+    categories = Category.objects.all()[:10]
+    influencers = CustomUser.objects.filter(user_type='influencer', is_active=True).select_related(
+        'influencer_profile'
+    )[:10]
     products = Product.objects.all().select_related('category', 'influencer')[:12]
+    videos = (
+        InfluencerVideo.objects.filter(is_active=True)
+        .select_related('influencer')
+        .prefetch_related('products')
+        .order_by('-created_at')[:10]
+    )
     context = {
         'categories': categories,
         'influencers': influencers,
         'products': products,
+        'videos': videos,
     }
     return render(request, 'home.html', context)
 
@@ -114,33 +127,13 @@ def influencer_dashboard(request):
 
         return redirect('influencer_dashboard')
 
-    # Get dashboard statistics
-    order_items = OrderItem.objects.filter(product__influencer=influencer).select_related('product')
+    # Get dashboard statistics (placeholder metrics - orders app not available)
+    total_revenue = 0
+    total_orders = 0
+    monthly_revenue = 0
+    monthly_orders = 0
 
-    total_revenue = order_items.aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
-    total_orders = order_items.values('order').distinct().count()
-
-    today = now()
-    monthly_revenue = order_items.filter(
-        order__created_at__year=today.year,
-        order__created_at__month=today.month
-    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
-
-    monthly_orders = order_items.filter(
-        order__created_at__year=today.year,
-        order__created_at__month=today.month
-    ).values('order').distinct().count()
-
-    top_products = (
-        Product.objects.filter(influencer=influencer)
-        .annotate(
-            total_sales=Sum('orderitem__quantity'),
-            total_revenue=Sum(F('orderitem__quantity') * F('orderitem__price'))
-        )
-        .filter(total_sales__isnull=False)
-        .select_related('category')
-        .order_by('-total_sales')[:5]
-    )
+    top_products = Product.objects.filter(influencer=influencer).select_related('category')[:5]
 
     # Get influencer's videos and products for the template
     videos = InfluencerVideo.objects.filter(influencer=request.user, is_active=True)
@@ -256,6 +249,12 @@ def featured_influencers(request):
 def search_view(request):
     query = request.GET.get('q', '').strip()
     current_page = request.GET.get('page', '')
+    video_reels = (
+        InfluencerVideo.objects.filter(is_active=True)
+        .select_related('influencer')
+        .prefetch_related('products')
+        .order_by('-created_at')[:10]
+    )
 
     if not query:
         if current_page == 'customer_dashboard':
@@ -269,7 +268,7 @@ def search_view(request):
                 'categories': categories,
             })
         elif current_page == 'home':
-            influencers = CustomUser.objects.filter(user_type='influencer')
+            influencers = CustomUser.objects.filter(user_type='influencer', is_active=True)
             products = Product.objects.all().select_related('category', 'influencer')[:12]
             categories = Category.objects.all()
             return render(request, 'home.html', {
@@ -277,6 +276,7 @@ def search_view(request):
                 'influencers': influencers,
                 'products': products,
                 'categories': categories,
+                'videos': video_reels,
             })
         elif current_page == 'influencers':
             profiles = InfluencerProfile.objects.filter(user__is_active=True).select_related('user')
@@ -304,6 +304,7 @@ def search_view(request):
         'influencers': influencers,
         'products': products,
         'categories': Category.objects.all(),
+        'videos': video_reels,
     }
 
     if current_page == 'customer_dashboard':
