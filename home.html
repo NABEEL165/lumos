@@ -934,6 +934,87 @@
         transform: scale(1.3);
     }
 
+    .video-shorts-section {
+        margin-top: 60px;
+    }
+
+    .video-shorts-section .section-title-bar {
+        align-items: flex-start;
+    }
+
+    .video-shorts-section .section-subtitle {
+        color: #b3b3b3;
+        font-size: 0.95rem;
+        margin-top: 6px;
+    }
+
+    .video-shorts-wrapper {
+        position: relative;
+        background: #1b1b1b;
+        border-radius: 30px;
+        padding: 30px 20px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+    }
+
+    .video-shorts-wrapper .video-shorts-swiper {
+        height: 520px;
+    }
+
+    .video-shorts-frame {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        overflow: hidden;
+        background: #000;
+    }
+
+    .video-shorts-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-shorts-products {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .product-tag {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .video-shorts-description {
+        color: #e3e3e3;
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+    }
+
+    .video-shorts-meta {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+    }
+
+    .video-shorts-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 100%;
+        gap: 10px;
+        color: #fff;
+    }
+
     /* Mobile Adjustments for WhatsApp Widget */
     @media (max-width: 768px) {
         .whatsapp-widget {
@@ -1595,175 +1676,91 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Product Reels -->
+            <section class="artist-section video-shorts-section" id="productReels">
+                <div class="section-title-bar mb-4">
+                    <div>
+                        <h2>Product Reels</h2>
+                        <p class="section-subtitle">See influencers demo their latest drops in vertical video</p>
+                    </div>
+                    <div class="video-shorts-meta">
+                        {{ videos|length }} reels
+
+                    </div>
+                </div>
+                <div class="video-shorts-wrapper">
+                    <div class="swiper video-shorts-swiper">
+                        <div class="swiper-wrapper">
+                            {% for video in videos %}
+                            <div class="swiper-slide video-shorts-slide">
+                                {% with primary_product=video.products.first %}
+                                <div class="video-shorts-frame">
+                                    <video
+                                        class="video-shorts-video"
+                                        controls
+                                        playsinline
+                                        muted
+                                        preload="metadata"
+                                        poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% elif primary_product and primary_product.image %}{{ primary_product.image.url }}{% endif %}"
+                                    >
+                                        <source src="{{ video.video_file.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <div class="video-shorts-overlay">
+                                        <div class="video-shorts-product-info">
+                                            <h3 class="video-shorts-product-name">{{ video.title }}</h3>
+                                            <p class="video-shorts-influencer">by {{ video.influencer.get_full_name|default:video.influencer.username }}</p>
+                                            {% if video.description %}
+                                            <p class="video-shorts-description">{{ video.description|truncatewords:20 }}</p>
+                                            {% endif %}
+                                            {% with linked_products=video.products.all %}
+                                            {% if linked_products %}
+                                            <div class="video-shorts-products">
+                                                {% for product in linked_products|slice:":2" %}
+                                                <span class="product-tag">
+                                                    <i class="bi bi-bag"></i> {{ product.name }} · ₹{{ product.price }}
+                                                </span>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        <div class="video-shorts-actions">
+                                            <button class="video-shorts-action-btn like-btn" type="button" data-video-id="{{ video.id }}">
+                                                <i class="bi bi-heart"></i> <span class="like-count">{{ video.likes }}</span>
+                                            </button>
+                                            {% if primary_product %}
+                                            <button class="video-shorts-action-btn" type="button" data-product-id="{{ primary_product.id }}">
+                                                <i class="bi bi-bag-plus"></i> Add to Cart
+                                            </button>
+                                            <a href="{% url 'product_detail' primary_product.id %}" class="video-shorts-action-btn">
+                                                <i class="bi bi-eye"></i> View Details
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endwith %}
+                            </div>
+                            {% empty %}
+                            <div class="swiper-slide video-shorts-slide">
+                                <div class="video-shorts-placeholder video-shorts-empty">
+                                    <i class="bi bi-play-btn" style="font-size: 3rem;"></i>
+                                    <p>No videos available yet</p>
+                                    <small>Influencers haven't uploaded any reels</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="video-shorts-pagination" id="videoShortsPagination"></div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- ===============================-->
-    <!--   🎥 Vertical Video Player (Shorts-Style)-->
-    <!--================================= -->-->
-    <!--<div class="video-shorts-container">-->
-    <!--    <div class="video-shorts-toggle" id="videoShortsToggle">-->
-    <!--        <i class="bi bi-play-btn-fill"></i>-->
-    <!--    </div>-->
-    <!--</div>-->
 
-    <!--<div class="video-shorts-player" id="videoShortsPlayer">-->
-    <!--    <div class="video-shorts-header">-->
-    <!--        <div class="video-shorts-title">Product Shorts</div>-->
-    <!--        <button class="video-shorts-close" id="videoShortsClose">-->
-    <!--            <i class="bi bi-x-lg"></i>-->
-    <!--        </button>-->
-    <!--    </div>-->
-    <!--    <div class="video-shorts-content">-->
-    <!--        <div class="swiper video-shorts-swiper" id="videoShortsSwiper">-->
-    <!--            <div class="swiper-wrapper">-->
-    <!--                 Product video slides - populated dynamically-->
-    <!--                {% for product in products|slice:":5" %}-->
-    <!--                <div class="swiper-slide video-shorts-slide">-->
-    <!--                    {% if product.image %}-->
-    <!--                    <div class="video-shorts-placeholder" style="background-image: url('{{ product.image.url }}');">-->
-    <!--                    </div>-->
-    <!--                    {% else %}-->
-    <!--                    <div class="video-shorts-placeholder" style="background-color: #333;">-->
-    <!--                        <div class="placeholder-text">Product Video</div>-->
-    <!--                    </div>-->
-    <!--                    {% endif %}-->
-    <!--                    <div class="video-shorts-overlay">-->
-    <!--                        <div class="video-shorts-product-info">-->
-    <!--                            <h3 class="video-shorts-product-name">{{ product.name }}</h3>-->
-    <!--                            <p class="video-shorts-product-price">₹{{ product.price }}</p>-->
-    <!--                            <p class="video-shorts-product-influencer">by {{ product.influencer.get_full_name|default:product.influencer.username }}</p>-->
-    <!--                        </div>-->
-    <!--                        <div class="video-shorts-actions">-->
-    <!--                            <button class="video-shorts-action-btn" data-product-id="{{ product.id }}">-->
-    <!--                                <i class="bi bi-bag-plus"></i> Add to Cart-->
-    <!--                            </button>-->
-    <!--                            <a href="{% url 'product_detail' product.id %}" class="video-shorts-action-btn">-->
-    <!--                                <i class="bi bi-eye"></i> View Details-->
-    <!--                            </a>-->
-    <!--                        </div>-->
-    <!--                    </div>-->
-    <!--                </div>-->
-    <!--                {% endfor %}-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--        <div class="video-shorts-pagination" id="videoShortsPagination">-->
-    <!--            {% for product in products|slice:":5" %}-->
-    <!--            <div class="video-shorts-pagination-dot {% if forloop.first %}active{% endif %}"></div>-->
-    <!--            {% endfor %}-->
-    <!--        </div>-->
-    <!--    </div>-->
-    <!--</div>-->
-
-<!-- In your home.html template -->
-{% for video in videos %}
-<div class="video-shorts-slide">
-    <div class="video-shorts-video-container">
-        <video
-            class="video-shorts-player"
-            controls
-            poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% elif video.products.first.image %}{{ video.products.first.image.url }}{% endif %}"
-        >
-            <source src="{{ video.video_file.url }}" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
-    <div class="video-shorts-overlay">
-        <div class="video-shorts-product-info">
-            <h3 class="video-shorts-product-name">{{ video.title }}</h3>
-            <p class="video-shorts-influencer">by {{ video.influencer.get_full_name|default:video.influencer.username }}</p>
-            {% if video.products.exists %}
-            <div class="video-shorts-products">
-                {% for product in video.products.all|slice:":2" %}
-                <span class="product-tag">
-                    <i class="bi bi-tag"></i> {{ product.name }} - ₹{{ product.price }}
-                </span>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-        <div class="video-shorts-actions">
-            <button class="video-shorts-action-btn like-btn" data-video-id="{{ video.id }}">
-                <i class="bi bi-heart"></i> <span class="like-count">{{ video.likes }}</span>
-            </button>
-            {% if video.products.first %}
-            <button class="video-shorts-action-btn" data-product-id="{{ video.products.first.id }}">
-                <i class="bi bi-bag-plus"></i> Add to Cart
-            </button>
-            <a href="{% url 'product_detail' video.products.first.id %}" class="video-shorts-action-btn">
-                <i class="bi bi-eye"></i> View Details
-            </a>
-            {% endif %}
-        </div>
-    </div>
-</div>
-{% empty %}
-<div class="video-shorts-slide">
-    <div class="video-shorts-placeholder" style="background-color: #333;">
-        <div class="placeholder-text">
-            <i class="bi bi-play-btn" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-            <p>No videos available yet</p>
-            <small>Influencers haven't uploaded any videos</small>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<!-- In your home.html file, replace the video shorts section with: -->
-<!--<div class="video-shorts-player" id="videoShortsPlayer">-->
-<!--    <div class="video-shorts-header">-->
-<!--        <div class="video-shorts-title">Product Shorts</div>-->
-<!--        <button class="video-shorts-close" id="videoShortsClose">-->
-<!--            <i class="bi bi-x-lg"></i>-->
-<!--        </button>-->
-<!--    </div>-->
-<!--    <div class="video-shorts-content">-->
-<!--        <div class="swiper video-shorts-swiper" id="videoShortsSwiper">-->
-<!--            <div class="swiper-wrapper">-->
-<!--                {% for video in videos %}-->
-<!--                <div class="swiper-slide video-shorts-slide">-->
-<!--                    <div class="video-shorts-video">-->
-<!--                        <video controls style="width: 100%; height: 100%; object-fit: cover;">-->
-<!--                            <source src="{{ video.video_file.url }}" type="video/mp4">-->
-<!--                            Your browser does not support the video tag.-->
-<!--                        </video>-->
-<!--                    </div>-->
-<!--                    <div class="video-shorts-overlay">-->
-<!--                        <div class="video-shorts-product-info">-->
-<!--                            <h3 class="video-shorts-product-name">{{ video.title }}</h3>-->
-<!--                            <p class="video-shorts-product-influencer">-->
-<!--                                by {{ video.influencer.get_full_name|default:video.influencer.username }}-->
-<!--                            </p>-->
-<!--                            <p class="video-description">{{ video.description|truncatewords:20 }}</p>-->
-<!--                        </div>-->
-<!--                        <div class="video-shorts-actions">-->
-<!--                            {% for product in video.linked_products.all %}-->
-<!--                            <button class="video-shorts-action-btn" data-product-id="{{ product.id }}">-->
-<!--                                <i class="bi bi-bag-plus"></i> {{ product.name }} - ₹{{ product.price }}-->
-<!--                            </button>-->
-<!--                            {% endfor %}-->
-<!--                            <a href="{% url 'product_detail' product.id %}" class="video-shorts-action-btn">-->
-<!--                                <i class="bi bi-eye"></i> View Details-->
-<!--                            </a>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                {% empty %}-->
-<!--                <div class="swiper-slide">-->
-<!--                    <div class="video-shorts-placeholder">-->
-<!--                        <div class="placeholder-text">No videos available yet</div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                {% endfor %}-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="video-shorts-pagination" id="videoShortsPagination">-->
-<!--            {% for video in videos %}-->
-<!--            <div class="video-shorts-pagination-dot {% if forloop.first %}active{% endif %}"></div>-->
-<!--            {% endfor %}-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
 
 
     <!-- Footer -->
@@ -1996,67 +1993,64 @@
         });
 
         // ===============================
-        // 🎥 Vertical Video Player (Shorts-Style) Functionality
+        // 🎥 Product Reels Functionality
         // ===============================
         document.addEventListener('DOMContentLoaded', function() {
-            const videoShortsToggle = document.getElementById('videoShortsToggle');
-            const videoShortsPlayer = document.getElementById('videoShortsPlayer');
-            const videoShortsClose = document.getElementById('videoShortsClose');
-            const videoShortsPagination = document.getElementById('videoShortsPagination');
-
-            // Initialize Swiper for video shorts
-            if (document.querySelector('.video-shorts-swiper')) {
+            const videoShortsWrapper = document.querySelector('.video-shorts-swiper');
+            if (videoShortsWrapper) {
                 const videoShortsSwiper = new Swiper('.video-shorts-swiper', {
                     direction: 'vertical',
                     slidesPerView: 1,
-                    spaceBetween: 0,
+                    spaceBetween: 24,
                     mousewheel: true,
                     pagination: {
-                        el: '.video-shorts-pagination',
+                        el: '#videoShortsPagination',
                         clickable: true,
                         renderBullet: function (index, className) {
                             return '<div class="' + className + '"></div>';
                         },
                     },
-                    on: {
-                        slideChange: function () {
-                            // Update pagination dots
-                            const dots = videoShortsPagination.querySelectorAll('.video-shorts-pagination-dot');
-                            dots.forEach((dot, index) => {
-                                if (index === this.activeIndex) {
-                                    dot.classList.add('active');
-                                } else {
-                                    dot.classList.remove('active');
-                                }
-                            });
-                        }
+                });
+
+                const getVideos = () => Array.from(document.querySelectorAll('.video-shorts-video'));
+
+                const pauseAllVideos = () => {
+                    getVideos().forEach(video => {
+                        video.pause();
+                        video.currentTime = 0;
+                    });
+                };
+
+                const playActiveVideo = () => {
+                    const activeSlide = videoShortsWrapper.querySelector('.swiper-slide-active video');
+                    if (!activeSlide) return;
+                    const playPromise = activeSlide.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                            // Autoplay may require user interaction; ignore errors.
+                        });
                     }
+                };
+
+                playActiveVideo();
+
+                videoShortsSwiper.on('slideChangeTransitionStart', pauseAllVideos);
+                videoShortsSwiper.on('slideChangeTransitionEnd', playActiveVideo);
+
+                getVideos().forEach(video => {
+                    video.addEventListener('play', () => {
+                        getVideos()
+                            .filter(other => other !== video)
+                            .forEach(other => other.pause());
+                    });
                 });
             }
 
-            // Open video shorts player
-            if (videoShortsToggle) {
-                videoShortsToggle.addEventListener('click', function() {
-                    videoShortsPlayer.classList.add('active');
-                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
-                });
-            }
-
-            // Close video shorts player
-            if (videoShortsClose) {
-                videoShortsClose.addEventListener('click', function() {
-                    videoShortsPlayer.classList.remove('active');
-                    document.body.style.overflow = ''; // Enable background scrolling
-                });
-            }
-
-            // Handle "Add to Cart" actions
+            // Handle "Add to Cart" actions from reels
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.video-shorts-action-btn[data-product-id]')) {
                     const button = e.target.closest('.video-shorts-action-btn');
                     const productId = button.getAttribute('data-product-id');
-
-                    // In a real implementation, you would make an AJAX call to add to cart
                     alert('Product added to cart! Product ID: ' + productId);
                 }
             });
