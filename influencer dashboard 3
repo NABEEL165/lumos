@@ -1601,6 +1601,45 @@
                 selectedProducts.push(checkbox.value);
             });
 
+//         document.getElementById('uploadVideoBtn').addEventListener('click', function() {
+//     const formData = new FormData();
+//     const videoFile = document.getElementById('videoFile').files[0];
+//     const title = document.getElementById('videoTitle').value;
+//     const description = document.getElementById('videoDescription').value;
+//     const thumbnail = document.getElementById('videoThumbnail').files[0];
+
+//     if (!videoFile || !title) {
+//         alert('Video and title are required!');
+//         return;
+//     }
+
+//     formData.append('video_file', videoFile);
+//     formData.append('title', title);
+//     formData.append('description', description);
+//     if (thumbnail) formData.append('thumbnail', thumbnail);
+
+//     // Add selected products
+//     document.querySelectorAll('#uploadVideoForm input:checked').forEach(cb => {
+//         formData.append('products', cb.value);
+//     });
+
+//     fetch("", {
+//         method: 'POST',
+//         body: formData,
+//         headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+//     })
+//     .then(res => res.json())
+//     .then(data => {
+//         if (data.success) {
+//             $('#uploadVideoModal').modal('hide');
+//             alert('Video uploaded!');
+//             // Optionally refresh video list
+//         } else {
+//             alert('Upload failed.');
+//         }
+//     });
+// });
+
             // Create video object
             const newVideo = {
                 id: 'video_' + Date.now(),
