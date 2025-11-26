@@ -738,6 +738,166 @@
         gap: 10px;
     }
 
+    /* Video Shorts Section Enhancements */
+    .video-shorts-section {
+        margin-top: 60px;
+        padding: 20px 0;
+    }
+
+    .video-shorts-wrapper {
+        position: relative;
+        background: #1b1b1b;
+        border-radius: 30px;
+        padding: 30px 20px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .video-shorts-wrapper .video-shorts-swiper {
+        height: 520px;
+    }
+
+    .video-shorts-frame {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .video-shorts-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-shorts-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 20px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        color: white;
+    }
+
+    .video-shorts-product-info {
+        margin-bottom: 15px;
+    }
+
+    .video-shorts-product-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .video-shorts-influencer {
+        font-size: 1rem;
+        color: #ccc;
+        margin-bottom: 10px;
+    }
+
+    .video-shorts-description {
+        color: #e3e3e3;
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+    }
+
+    .video-shorts-products {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .product-tag {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .video-shorts-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .video-shorts-action-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .video-shorts-action-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .video-shorts-pagination {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .video-shorts-pagination-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .video-shorts-pagination-dot.active {
+        background: white;
+        transform: scale(1.3);
+    }
+
+    .video-shorts-section .section-title-bar {
+        align-items: flex-start;
+    }
+
+    .video-shorts-section .section-subtitle {
+        color: #b3b3b3;
+        font-size: 0.95rem;
+        margin-top: 6px;
+    }
+
+    .video-shorts-meta {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+    }
+
+    .video-shorts-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        height: 100%;
+        gap: 10px;
+        color: #fff;
+    }
+
     .video-shorts-toggle {
         background: linear-gradient(135deg, #25d366, #128c7e);
         border-radius: 50%;
@@ -1505,6 +1665,7 @@
                     </div>
                     <a href="{% url 'register_customer' %}" class="btn btn-signup me-2">Sign up</a>
                     <a href="{% url 'login' %}" class="btn btn-login">Log in</a>
+
                 </div>
             </div>
         </div>
@@ -1678,15 +1839,14 @@
             </section>
 
             <!-- Product Reels -->
-            <section class="artist-section video-shorts-section" id="productReels">
+            <section class="artist-section video-shorts-section" id="productReels" style="display: block;">
                 <div class="section-title-bar mb-4">
                     <div>
                         <h2>Product Reels</h2>
                         <p class="section-subtitle">See influencers demo their latest drops in vertical video</p>
                     </div>
                     <div class="video-shorts-meta">
-                        {{ videos|length }} reels
-
+                        <span id="video-count">{{ videos|length }}</span> reels
                     </div>
                 </div>
                 <div class="video-shorts-wrapper">
@@ -1702,7 +1862,7 @@
                                         playsinline
                                         muted
                                         preload="metadata"
-                                        poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% elif primary_product and primary_product.image %}{{ primary_product.image.url }}{% endif %}"
+                                        poster="{% if video.thumbnail %}{{ video.thumbnail.url }}{% elif primary_product and primary_product.image %}{{ primary_product.image.url }}{% else %}{% static 'images/video-placeholder.jpg' %}{% endif %}"
                                     >
                                         <source src="{{ video.video_file.url }}" type="video/mp4">
                                         Your browser does not support the video tag.
@@ -1722,6 +1882,12 @@
                                                     <i class="bi bi-bag"></i> {{ product.name }} · ₹{{ product.price }}
                                                 </span>
                                                 {% endfor %}
+                                            </div>
+                                            {% else %}
+                                            <div class="video-shorts-products">
+                                                <span class="product-tag">
+                                                    <i class="bi bi-person-video"></i> Influencer Video
+                                                </span>
                                             </div>
                                             {% endif %}
                                             {% endwith %}
@@ -1753,7 +1919,11 @@
                             </div>
                             {% endfor %}
                         </div>
-                        <div class="video-shorts-pagination" id="videoShortsPagination"></div>
+                        <div class="video-shorts-pagination" id="videoShortsPagination">
+                            {% for video in videos %}
+                            <div class="video-shorts-pagination-dot {% if forloop.first %}active{% endif %}"></div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1997,53 +2167,88 @@
         // ===============================
         document.addEventListener('DOMContentLoaded', function() {
             const videoShortsWrapper = document.querySelector('.video-shorts-swiper');
+            const videoCount = document.getElementById('video-count');
+
+            console.log('Video Reels Section:', videoShortsWrapper ? 'Found' : 'Not Found');
+            console.log('Video Count:', videoCount ? videoCount.textContent : 'Unknown');
+
             if (videoShortsWrapper) {
-                const videoShortsSwiper = new Swiper('.video-shorts-swiper', {
-                    direction: 'vertical',
-                    slidesPerView: 1,
-                    spaceBetween: 24,
-                    mousewheel: true,
-                    pagination: {
-                        el: '#videoShortsPagination',
-                        clickable: true,
-                        renderBullet: function (index, className) {
-                            return '<div class="' + className + '"></div>';
+                // Check if there are any slides
+                const slides = videoShortsWrapper.querySelectorAll('.swiper-slide');
+                console.log('Number of video slides:', slides.length);
+
+                if (slides.length > 0) {
+                    const videoShortsSwiper = new Swiper('.video-shorts-swiper', {
+                        direction: 'vertical',
+                        slidesPerView: 1,
+                        spaceBetween: 24,
+                        mousewheel: true,
+                        pagination: {
+                            el: '#videoShortsPagination',
+                            clickable: true,
+                            bulletClass: 'video-shorts-pagination-dot',
+                            bulletActiveClass: 'active',
                         },
-                    },
-                });
-
-                const getVideos = () => Array.from(document.querySelectorAll('.video-shorts-video'));
-
-                const pauseAllVideos = () => {
-                    getVideos().forEach(video => {
-                        video.pause();
-                        video.currentTime = 0;
+                        on: {
+                            slideChange: function () {
+                                // Update pagination dots
+                                const dots = document.querySelectorAll('#videoShortsPagination .video-shorts-pagination-dot');
+                                dots.forEach((dot, index) => {
+                                    if (index === this.activeIndex) {
+                                        dot.classList.add('active');
+                                    } else {
+                                        dot.classList.remove('active');
+                                    }
+                                });
+                            }
+                        }
                     });
-                };
 
-                const playActiveVideo = () => {
-                    const activeSlide = videoShortsWrapper.querySelector('.swiper-slide-active video');
-                    if (!activeSlide) return;
-                    const playPromise = activeSlide.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(() => {
-                            // Autoplay may require user interaction; ignore errors.
+                    // Set fallback poster for videos
+                    document.querySelectorAll('.video-shorts-video').forEach(video => {
+                        video.addEventListener('error', function() {
+                            console.error('Video load error:', this.src);
+                            this.poster = '{% static "images/video-placeholder.jpg" %}';
                         });
-                    }
-                };
-
-                playActiveVideo();
-
-                videoShortsSwiper.on('slideChangeTransitionStart', pauseAllVideos);
-                videoShortsSwiper.on('slideChangeTransitionEnd', playActiveVideo);
-
-                getVideos().forEach(video => {
-                    video.addEventListener('play', () => {
-                        getVideos()
-                            .filter(other => other !== video)
-                            .forEach(other => other.pause());
                     });
-                });
+
+                    const getVideos = () => Array.from(document.querySelectorAll('.video-shorts-video'));
+
+                    const pauseAllVideos = () => {
+                        getVideos().forEach(video => {
+                            video.pause();
+                            video.currentTime = 0;
+                        });
+                    };
+
+                    const playActiveVideo = () => {
+                        const activeSlide = videoShortsWrapper.querySelector('.swiper-slide-active video');
+                        if (!activeSlide) return;
+                        const playPromise = activeSlide.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => {
+                                // Autoplay may require user interaction; ignore errors.
+                            });
+                        }
+                    };
+
+                    playActiveVideo();
+
+                    videoShortsSwiper.on('slideChangeTransitionStart', pauseAllVideos);
+                    videoShortsSwiper.on('slideChangeTransitionEnd', playActiveVideo);
+
+                    getVideos().forEach(video => {
+                        video.addEventListener('play', () => {
+                            getVideos()
+                                .filter(other => other !== video)
+                                .forEach(other => other.pause());
+                        });
+                    });
+                } else {
+                    console.log('No video slides found - showing empty state');
+                }
+            } else {
+                console.log('Video shorts wrapper not found');
             }
 
             // Handle "Add to Cart" actions from reels
