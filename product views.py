@@ -2,13 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Product, Review, Category
 from .forms import ProductForm, ReviewForm, CategoryForm
-from account.models import CustomUser, Order, OrderItem
-# from orders.models import WishlistItem, Order, OrderItem  # Commented out - orders app not available
+from accounts.models import CustomUser
+from orders.models import WishlistItem, Order, OrderItem
 from django.contrib import messages
 from django.db.models import Avg, Q, Sum
 from django.http import HttpResponse
-from django.utils import timezone
-from datetime import timedelta
 
 
 
@@ -124,8 +122,9 @@ def influencer_products(request, influencer_id):
             'avg_rating': avg_rating
         })
 
-    # Removed wishlist functionality as it's not available in the current setup
     wishlist_products = []
+    if request.user.is_authenticated:
+        wishlist_products = WishlistItem.objects.filter(user=request.user).values_list('product_id', flat=True)
 
     return render(request, 'influencer_products.html', {
         'influencer': influencer,
@@ -149,89 +148,77 @@ def product_detail(request, product_id):
 @login_required
 def influencer_sold_products(request):
     """
-    Display sold products for an influencer with filtering capabilities.
-    Shows Order ID, customer name, product, date, amount (₹)
-    With filters for month or product
-    And monthly/weekly/daily revenue stats
+    Display sold products for an influencer.
+    This view shows products that have been sold by the logged-in influencer.
     """
     # Check if the user is an influencer
     if request.user.user_type != 'influencer':
         return redirect('home')
 
-    # Get filter parameters
-    filter_type = request.GET.get('filter_type', '')
-    filter_value = request.GET.get('filter_value', '')
-    
-    # Start with all order items for this influencer's products
-    sold_items = OrderItem.objects.filter(
-        product__influencer=request.user
-    ).select_related('order', 'product', 'order__customer')
-    
-    # Apply filters
-    if filter_type == 'month' and filter_value:
-        try:
-            # Parse month/year from filter_value (format: MM-YYYY)
-            month, year = map(int, filter_value.split('-'))
-            sold_items = sold_items.filter(
-                order__created_at__year=year,
-                order__created_at__month=month
-            )
-        except ValueError:
-            pass  # Invalid format, ignore filter
-    elif filter_type == 'product' and filter_value:
-        try:
-            product_id = int(filter_value)
-            sold_items = sold_items.filter(product_id=product_id)
-        except ValueError:
-            pass  # Invalid product ID, ignore filter
-    
-    # Calculate revenue statistics
-    # Monthly revenue (current month)
-    today = timezone.now()
-    start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    monthly_revenue = sold_items.filter(
-        order__created_at__gte=start_of_month
-    ).aggregate(total=Sum('price'))['total'] or 0
-    
-    # Weekly revenue (last 7 days)
-    week_ago = today - timedelta(days=7)
-    weekly_revenue = sold_items.filter(
-        order__created_at__gte=week_ago
-    ).aggregate(total=Sum('price'))['total'] or 0
-    
-    # Daily revenue (today)
-    start_of_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
-    daily_revenue = sold_items.filter(
-        order__created_at__gte=start_of_day
-    ).aggregate(total=Sum('price'))['total'] or 0
-    
-    # Format revenue values
+    # Sample data for demonstration (as there's no order system implemented yet)
+    sold_products = [
+        # {
+        #     'order_id': 'ORD001',
+        #     'customer_name': 'John Doe',
+        #     'product': {
+        #         'name': 'Premium T-Shirt',
+        #         'image': None
+        #     },
+        #     'date': '2025-10-15',
+        #     'total': '1,299.00'
+        # },
+        # {
+        #     'order_id': 'ORD002',
+        #     'customer_name': 'Jane Smith',
+        #     'product': {
+        #         'name': 'Designer Jeans',
+        #         'image': None
+        #     },
+        #     'date': '2025-10-18',
+        #     'total': '2,499.00'
+        # },
+        # {
+        #     'order_id': 'ORD003',
+        #     'customer_name': 'Robert Johnson',
+        #     'product': {
+        #         'name': 'Running Shoes',
+        #         'image': None
+        #     },
+        #     'date': '2025-10-20',
+        #     'total': '3,999.00'
+        # },
+        # {
+        #     'order_id': 'ORD004',
+        #     'customer_name': 'Emily Davis',
+        #     'product': {
+        #         'name': 'Smart Watch',
+        #         'image': None
+        #     },
+        #     'date': '2025-10-22',
+        #     'total': '12,999.00'
+        # },
+        # {
+        #     'order_id': 'ORD005',
+        #     'customer_name': 'Michael Brown',
+        #     'product': {
+        #         'name': 'Leather Wallet',
+        #         'image': None
+        #     },
+        #     'date': '2025-10-25',
+        #     'total': '1,899.00'
+        # }
+    ]
+
+    # Sample stats data
     stats = {
-        'monthly_revenue': "{:,.2f}".format(monthly_revenue),
-        'weekly_revenue': "{:,.2f}".format(weekly_revenue),
-        'daily_revenue': "{:,.2f}".format(daily_revenue)
+        # 'monthly_revenue': '1,25,000',
+        # 'weekly_revenue': '28,500',
+        # 'daily_revenue': '3,200'
     }
-    
-    # Prepare sold products data for display
-    sold_products = []
-    for item in sold_items:
-        sold_products.append({
-            'order_id': item.order.id,
-            'customer_name': item.order.customer.full_name or item.order.customer.username,
-            'product': item.product,
-            'date': item.order.created_at.strftime('%Y-%m-%d'),
-            'total': "{:,.2f}".format(float(item.price))
-        })
-    
-    # Get all products for this influencer for the filter dropdown
-    influencer_products = Product.objects.filter(influencer=request.user)
-    
+
     return render(request, 'sold_product.html', {
         'sold_products': sold_products,
-        'stats': stats,
-        'influencer_products': influencer_products,
-        'filter_type': filter_type,
-        'filter_value': filter_value
+        'stats': stats
     })
 
 
