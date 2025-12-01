@@ -1837,153 +1837,22 @@
     transform: translateY(0);
 }
 
-/* RESPONSIVE BREAKPOINTS */
 
-/* Large Desktop (1440px+) */
-@media (min-width: 1440px) {
-    .whatsapp-widget {
-        bottom: 30px;
-        right: 30px;
-    }
-    .whatsapp-button {
-        width: 70px;
-        height: 70px;
-    }
-    .whatsapp-button i.bi-whatsapp {
-        font-size: 32px;
-    }
-}
-
-/* Desktop (1024px - 1439px) */
-@media (min-width: 1024px) and (max-width: 1439px) {
-    .whatsapp-widget {
-        bottom: 25px;
-        right: 25px;
-    }
-    .whatsapp-button {
-        width: 65px;
-        height: 65px;
-    }
-}
-
-/* Tablet Landscape (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-    .whatsapp-widget {
-        bottom: 20px;
-        right: 20px;
-    }
-    .whatsapp-button {
-        width: 60px;
-        height: 60px;
-    }
-}
-
-/* Tablet Portrait & Small Desktop (576px - 767px) */
-@media (min-width: 576px) and (max-width: 767px) {
-    .whatsapp-widget {
-        bottom: 15px;
-        right: 15px;
-    }
-    .whatsapp-button {
-        width: 55px;
-        height: 55px;
-    }
-}
-
-/* Mobile Landscape (480px - 575px) */
-@media (min-width: 480px) and (max-width: 575px) and (orientation: landscape) {
-    .whatsapp-widget {
-        bottom: 10px;
-        right: 10px;
-    }
-    .whatsapp-button {
-        width: 50px;
-        height: 50px;
-    }
-    .whatsapp-button i.bi-whatsapp {
-        font-size: 26px;
-    }
-    .whatsapp-tooltip {
-        font-size: 13px;
-        padding: 8px 12px;
-        bottom: 70px;
-    }
-}
-
-/* Mobile Portrait (320px - 479px) */
-@media (max-width: 479px) {
-    .whatsapp-widget {
-        bottom: 10px;
-        right: 10px;
-    }
-    .whatsapp-button {
-        width: 52px;
-        height: 52px;
-    }
-    .whatsapp-button i.bi-whatsapp {
-        font-size: 24px;
-    }
-    .whatsapp-tooltip {
-        font-size: 12px;
-        padding: 8px 12px;
-        bottom: 70px;
-        right: -20px;
-    }
-}
-
-/* Very Small Mobile (< 320px) */
-@media (max-width: 319px) {
-    .whatsapp-widget {
-        bottom: 8px;
-        right: 8px;
-    }
-    .whatsapp-button {
-        width: 48px;
-        height: 48px;
-    }
-    .whatsapp-button i.bi-whatsapp {
-        font-size: 22px;
-    }
-    .whatsapp-tooltip {
-        font-size: 11px;
-        padding: 6px 10px;
-        bottom: 65px;
-    }
-}
-
-/* Touch Devices Optimization */
-@media (hover: none) and (pointer: coarse) {
-    .whatsapp-button {
-        min-width: 56px;
-        min-height: 56px;
-    }
-    .whatsapp-widget:active .whatsapp-button {
-        transform: scale(0.95);
-    }
-}
-
-/* Reduce Motion for Accessibility */
-@media (prefers-reduced-motion: reduce) {
-    .whatsapp-button,
-    .whatsapp-tooltip {
-        transition: none;
-    }
-}
     </style>
 </head>
 
 <body>
-    <!-- Floating Background Elements -->
+
     <div class="floating-shapes">
         <div class="shape"></div>
         <div class="shape"></div>
         <div class="shape"></div>
     </div>
 
-    <!-- Mobile Navigation Overlay -->
+
     <div class="nav-overlay" id="navOverlay"></div>
 
-    <!-- Mobile Search Form -->
+
     <div class="mobile-search-form" id="mobileSearchForm">
         <form action="{% url 'search' %}" method="get" class="amazon-search-form">
             <input type="hidden" name="page" value="customer_dashboard">
@@ -2000,18 +1869,18 @@
     </div>
 
     <div class="content-wrapper">
-        <!-- Professional Enhanced Navbar -->
+
         <nav class="navbar">
             <div class="navbar-container">
-                <!-- Brand Section -->
+
                 <div class="navbar-brand">
                     <img src="{% static 'assets/images/lumoskart-logo.png' %}" alt="Lumoskart Logo" class="logo-img">
-                    <!--<span class="brand-text">Lumoskart</span>-->
+                    <span class="brand-text"></span>
                 </div>
 
-                <!-- Navigation Section -->
+
                 <div class="navbar-nav">
-                    <!-- Amazon-style Search Bar -->
+
                     <div class="amazon-search-container">
                         <form action="{% url 'search' %}" method="get" class="amazon-search-form">
                             <input type="hidden" name="page" value="customer_dashboard">
@@ -2020,14 +1889,14 @@
                                 <option>Products</option>
                                 <option>Influencers</option>
                             </select>
-                            <input type="text" name="q" class="search-input" placeholder="Search products, influencers..." value="{{ query|default:'' }}">
+                            <input type="text" name="q" class="search-input" placeholder="Who’s your favorite influencer" value="{{ query|default:'' }}">
                             <button type="submit" class="search-button">
                                 <span class="search-icon">🔍</span>
                             </button>
                         </form>
                     </div>
 
-                    <!-- Mobile Search Toggle -->
+
                     <div class="mobile-search-toggle" id="mobileSearchToggle">
                         🔍
                     </div>
@@ -2047,20 +1916,22 @@
                         </a></li>
                     </ul>
 
-                    <!-- Cart Icon -->
+
                     <a href="{% url 'view_cart' %}" class="cart-link" title="Shopping Cart">
                         <span class="cart-icon">🛒</span>
                         <span class="cart-badge">{{ cart_item_count }}</span>
                     </a>
 
-                    <!-- Profile Icon -->
+
                     <a href="" class="profile-link" title="View Profile">
                         <div class="profile-icon">
-                            <span class="profile-icon-inner">👤</span>
+                            <span class="profile-icon-inner"></span>
                         </div>
                         <span class="profile-name">{{ user.get_full_name|default:user.username }}</span>
                     </a>
                 </div>
+
+
 
                 <!-- Hamburger Menu -->
                 <button class="hamburger" id="hamburger" aria-label="Menu">
@@ -2174,128 +2045,128 @@
         </div>
 
         <!-- ===============================
-           🎬 Product Reels Section
-        ================================= -->
-        <div class="section-container">
-            <div class="section-header">
-                <h2 class="section-title">
-                    🎬 Product Reels
-                </h2>
-                <p class="section-description">Watch influencers showcase their products in action. Real videos from real creators.</p>
-            </div>
-            <div class="reels-container">
-                <div class="swiper reels-swiper">
-                    <div class="swiper-wrapper">
-                        {% for product in products|slice:":6" %}
-                        <div class="swiper-slide">
-                            <div class="reel-card">
-                                <div class="reel-video-container">
+        <!--   🎬 Product Reels Section-->
+        <!--================================= -->-->
+        <!--<div class="section-container">-->
+        <!--    <div class="section-header">-->
+        <!--        <h2 class="section-title">-->
+        <!--            🎬 Product Reels-->
+        <!--        </h2>-->
+        <!--        <p class="section-description">Watch influencers showcase their products in action. Real videos from real creators.</p>-->
+        <!--    </div>-->
+        <!--    <div class="reels-container">-->
+        <!--        <div class="swiper reels-swiper">-->
+        <!--            <div class="swiper-wrapper">-->
+        <!--                {% for product in products|slice:":6" %}-->
+        <!--                <div class="swiper-slide">-->
+        <!--                    <div class="reel-card">-->
+        <!--                        <div class="reel-video-container">-->
                                     <!-- Video Player -->
-                                    <div class="reel-video-player" id="videoPlayer-{{ product.id }}">
+        <!--                            <div class="reel-video-player" id="videoPlayer-{{ product.id }}">-->
                                         <!-- In a real implementation, this would be an actual video element -->
                                         <!-- <video src="{{ product.video_url }}" controls></video> -->
                                         <!-- For now, we'll use the image as a placeholder -->
-                                        {% if product.image %}
-                                        <div style="background-image: url('{{ product.image.url }}'); width: 100%; height: 100%; background-size: cover; background-position: center;"></div>
-                                        {% else %}
-                                        <div style="background-color: #333; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                                            <span style="color: white; font-size: 1.5rem;">Product Video</span>
-                                        </div>
-                                        {% endif %}
-                                        <div class="reel-video-controls">
-                                            <button class="reel-video-control-btn pause-btn" data-product-id="{{ product.id }}">
-                                                <i class="bi bi-pause"></i>
-                                            </button>
-                                            <button class="reel-video-control-btn stop-btn" data-product-id="{{ product.id }}">
-                                                <i class="bi bi-stop"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+        <!--                                {% if product.image %}-->
+        <!--                                <div style="background-image: url('{{ product.image.url }}'); width: 100%; height: 100%; background-size: cover; background-position: center;"></div>-->
+        <!--                                {% else %}-->
+        <!--                                <div style="background-color: #333; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">-->
+        <!--                                    <span style="color: white; font-size: 1.5rem;">Product Video</span>-->
+        <!--                                </div>-->
+        <!--                                {% endif %}-->
+        <!--                                <div class="reel-video-controls">-->
+        <!--                                    <button class="reel-video-control-btn pause-btn" data-product-id="{{ product.id }}">-->
+        <!--                                        <i class="bi bi-pause"></i>-->
+        <!--                                    </button>-->
+        <!--                                    <button class="reel-video-control-btn stop-btn" data-product-id="{{ product.id }}">-->
+        <!--                                        <i class="bi bi-stop"></i>-->
+        <!--                                    </button>-->
+        <!--                                </div>-->
+        <!--                            </div>-->
 
                                     <!-- Video Placeholder with Play Overlay -->
-                                    <div class="reel-video-placeholder" id="videoPlaceholder-{{ product.id }}">
-                                        {% if product.image %}
-                                        <div style="background-image: url('{{ product.image.url }}'); width: 100%; height: 100%; background-size: cover; background-position: center;"></div>
-                                        {% else %}
-                                        <div style="background-color: #333; width: 100%; height: 100%;"></div>
-                                        {% endif %}
-                                        <div class="reel-play-overlay" data-product-id="{{ product.id }}">
-                                            <i class="bi bi-play-circle-fill"></i>
-                                        </div>
-                                    </div>
+        <!--                            <div class="reel-video-placeholder" id="videoPlaceholder-{{ product.id }}">-->
+        <!--                                {% if product.image %}-->
+        <!--                                <div style="background-image: url('{{ product.image.url }}'); width: 100%; height: 100%; background-size: cover; background-position: center;"></div>-->
+        <!--                                {% else %}-->
+        <!--                                <div style="background-color: #333; width: 100%; height: 100%;"></div>-->
+        <!--                                {% endif %}-->
+        <!--                                <div class="reel-play-overlay" data-product-id="{{ product.id }}">-->
+        <!--                                    <i class="bi bi-play-circle-fill"></i>-->
+        <!--                                </div>-->
+        <!--                            </div>-->
 
-                                    <div class="reel-video-info">
-                                        <h3 class="reel-product-name">{{ product.name }}</h3>
-                                        <p class="reel-product-price">${{ product.price }}</p>
-                                        <p class="reel-influencer-name">
-                                            <i class="bi bi-person-circle"></i>
-                                            {{ product.influencer.get_full_name|default:product.influencer.username }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="reel-actions">
-                                    <button class="reel-action-btn like-btn" data-product-id="{{ product.id }}">
-                                        <i class="bi bi-heart"></i>
-                                        <span>Like</span>
-                                    </button>
-                                    <button class="reel-action-btn comment-btn" data-product-id="{{ product.id }}">
-                                        <i class="bi bi-chat"></i>
-                                        <span>Comment</span>
-                                    </button>
-                                    <button class="reel-action-btn share-btn" data-product-id="{{ product.id }}">
-                                        <i class="bi bi-share"></i>
-                                        <span>Share</span>
-                                    </button>
-                                    <a href="{% url 'product_detail' product.id %}" class="reel-action-btn view-btn">
-                                        <i class="bi bi-bag"></i>
-                                        <span>View</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+        <!--                            <div class="reel-video-info">-->
+        <!--                                <h3 class="reel-product-name">{{ product.name }}</h3>-->
+        <!--                                <p class="reel-product-price">${{ product.price }}</p>-->
+        <!--                                <p class="reel-influencer-name">-->
+        <!--                                    <i class="bi bi-person-circle"></i>-->
+        <!--                                    {{ product.influencer.get_full_name|default:product.influencer.username }}-->
+        <!--                                </p>-->
+        <!--                            </div>-->
+        <!--                        </div>-->
+        <!--                        <div class="reel-actions">-->
+        <!--                            <button class="reel-action-btn like-btn" data-product-id="{{ product.id }}">-->
+        <!--                                <i class="bi bi-heart"></i>-->
+        <!--                                <span>Like</span>-->
+        <!--                            </button>-->
+        <!--                            <button class="reel-action-btn comment-btn" data-product-id="{{ product.id }}">-->
+        <!--                                <i class="bi bi-chat"></i>-->
+        <!--                                <span>Comment</span>-->
+        <!--                            </button>-->
+        <!--                            <button class="reel-action-btn share-btn" data-product-id="{{ product.id }}">-->
+        <!--                                <i class="bi bi-share"></i>-->
+        <!--                                <span>Share</span>-->
+        <!--                            </button>-->
+        <!--                            <a href="{% url 'product_detail' product.id %}" class="reel-action-btn view-btn">-->
+        <!--                                <i class="bi bi-bag"></i>-->
+        <!--                                <span>View</span>-->
+        <!--                            </a>-->
+        <!--                        </div>-->
+        <!--                    </div>-->
+        <!--                </div>-->
+        <!--                {% endfor %}-->
+        <!--            </div>-->
                     <!-- Add Pagination -->
-                    <div class="swiper-pagination reels-pagination"></div>
+        <!--            <div class="swiper-pagination reels-pagination"></div>-->
                     <!-- Add Navigation -->
-                    <div class="swiper-button-next reels-button-next"></div>
-                    <div class="swiper-button-prev reels-button-prev"></div>
-                </div>
-            </div>
-        </div>
+        <!--            <div class="swiper-button-next reels-button-next"></div>-->
+        <!--            <div class="swiper-button-prev reels-button-prev"></div>-->
+        <!--        </div>-->
+        <!--    </div>-->
+        <!--</div>-->
 
         <!-- ===============================
-           🗨️ Comment Modal
-        ================================= -->
-        <div class="comment-modal" id="commentModal">
-            <div class="comment-modal-content">
-                <div class="comment-modal-header">
-                    <div class="comment-modal-title">Comments</div>
-                    <button class="comment-modal-close" id="commentModalClose">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-                <div class="comment-modal-body">
-                    <ul class="comment-list" id="commentList">
+        <!--   🗨️ Comment Modal-->
+        <!--================================= -->-->
+        <!--<div class="comment-modal" id="commentModal">-->
+        <!--    <div class="comment-modal-content">-->
+        <!--        <div class="comment-modal-header">-->
+        <!--            <div class="comment-modal-title">Comments</div>-->
+        <!--            <button class="comment-modal-close" id="commentModalClose">-->
+        <!--                <i class="bi bi-x-lg"></i>-->
+        <!--            </button>-->
+        <!--        </div>-->
+        <!--        <div class="comment-modal-body">-->
+        <!--            <ul class="comment-list" id="commentList">-->
                         <!-- Comments will be dynamically added here -->
-                        <li class="comment-item">
-                            <div class="comment-author">John Doe</div>
-                            <div class="comment-text">This product looks amazing! Where can I buy it?</div>
-                            <div class="comment-date">2 hours ago</div>
-                        </li>
-                        <li class="comment-item">
-                            <div class="comment-author">Jane Smith</div>
-                            <div class="comment-text">I've been using this for a month now and it's fantastic!</div>
-                            <div class="comment-date">1 day ago</div>
-                        </li>
-                    </ul>
-                    <form class="comment-form" id="commentForm">
-                        <input type="text" class="comment-input" placeholder="Add a comment..." id="commentInput">
-                        <button type="submit" class="comment-submit">Post</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <!--                <li class="comment-item">-->
+        <!--                    <div class="comment-author">John Doe</div>-->
+        <!--                    <div class="comment-text">This product looks amazing! Where can I buy it?</div>-->
+        <!--                    <div class="comment-date">2 hours ago</div>-->
+        <!--                </li>-->
+        <!--                <li class="comment-item">-->
+        <!--                    <div class="comment-author">Jane Smith</div>-->
+        <!--                    <div class="comment-text">I've been using this for a month now and it's fantastic!</div>-->
+        <!--                    <div class="comment-date">1 day ago</div>-->
+        <!--                </li>-->
+        <!--            </ul>-->
+        <!--            <form class="comment-form" id="commentForm">-->
+        <!--                <input type="text" class="comment-input" placeholder="Add a comment..." id="commentInput">-->
+        <!--                <button type="submit" class="comment-submit">Post</button>-->
+        <!--            </form>-->
+        <!--        </div>-->
+        <!--    </div>-->
+        <!--</div>-->
 
         <!-- Footer -->
         <footer class="footer">
