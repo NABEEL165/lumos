@@ -1,0 +1,104 @@
+from rest_framework import viewsets, generics, status, permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+from django.contrib.auth.models import User
+from .models import Profile, Bill, Pickup, Address, UserPreference
+from .serializers import (
+    UserSerializer, ProfileSerializer, BillSerializer, 
+    PickupSerializer, AddressSerializer, UserPreferenceSerializer
+)
+
+class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, created = Token.objects.get_or_create(user=user)
+            # Create associated profile and preferences
+            Profile.objects.create(user=user)
+            UserPreference.objects.create(user=user)
+            return Response({
+                'token': token.key,
+                'user_id': user.pk,
+                'email': user.email,
+                'username': user.username
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email,
+            'username': user.username
+        })
+
+class HomeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        # Example stats
+        pending_bills = Bill.objects.filter(user=user, is_paid=False).count()
+        scheduled_pickups = Pickup.objects.filter(user=user, status='scheduled').count()
+        
+        return Response({
+            'username': user.username,
+            'pending_bills': pending_bills,
+            'scheduled_pickups': scheduled_pickups,
+            'message': f"Welcome back, {user.username}!"
+        })
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+
+class BillViewSet(viewsets.ModelViewSet):
+    serializer_class = BillSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Bill.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class PickupViewSet(viewsets.ModelViewSet):
+    serializer_class = PickupSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Pickup.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class AddressViewSet(viewsets.ModelViewSet):
+    serializer_class = AddressSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Address.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class SettingsView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserPreferenceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.preferences
