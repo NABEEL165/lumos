@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Submitted - Lumoskart</title>
+    <!-- Favicon -->
+    {% load static %}
+    <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}" type="image/x-icon">
+
+    <!-- Fonts -->
+    <link href="{% static 'assets/fonts/universal-serif.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/fonts/poppins.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap 5 Icons -->
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap-icons.min.css' %}">
+
+    <!-- Custom CSS -->
+    <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+    
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 5rem auto;
+            padding: 3rem;
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-primary {
+            background-color: #4361ee;
+            border-color: #4361ee;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a56d4;
+            border-color: #3a56d4;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .success-container {
+                margin: 2rem 1rem;
+                padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .success-icon {
+                font-size: 3rem;
+            }
+            
+            .d-grid.col-6.mx-auto {
+                width: 100% !important;
+                max-width: 300px;
+                margin: 0 auto !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .success-container {
+                margin: 1rem 0.5rem;
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.25rem;
+            }
+            
+            .success-icon {
+                font-size: 2.5rem;
+            }
+        }
+        
+        /* Responsive navbar */
+        .navbar-logo {
+            max-height: 40px;
+        }
+        
+        .navbar-brand {
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="navbar-brand d-flex align-items-center">
+                <img src="{% static 'accounts/images/Lumoskart.png' %}" alt="Company Logo" class="navbar-logo">
+                <span class="company-name ms-2">Lumoskart</span>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="{% url 'home' %}" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'about_us' %}" class="nav-link"><i class="fas fa-info-circle"></i> About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active"><i class="fas fa-user-plus"></i> Apply as Influencer</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="success-container">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1 class="mb-3">Application Submitted Successfully!</h1>
+            <p class="lead mb-4">Thank you for applying to become an influencer on Lumoskart.</p>
+            <p class="mb-4">Our team will review your application shortly. You will receive an email notification once your application has been approved.</p>
+            
+            <div class="d-grid gap-2 col-6 mx-auto">
+                <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home"></i> Go to Homepage
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html>
