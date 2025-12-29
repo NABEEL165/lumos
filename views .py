@@ -1,44 +1,86 @@
+
+
+
+
+
+
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from django.db.models import  Q
-from django.utils.timezone import now
-from .forms import InfluencerRegisterForm, CustomerRegisterForm, InfluencerProfileForm
-from .models import CustomUser, InfluencerProfile, InfluencerVideo
+from django.db.models import  Q, Sum, F
+# from django.utils.timezone import now
+from .forms import InfluencerRegisterForm, CustomerRegisterForm, InfluencerProfileForm,VideoUploadForm,VideoEditForm
+from .models import CustomUser, InfluencerProfile, InfluencerVideo, WithdrawRequest, Order, OrderItem, InfluencerApplication
+from django.contrib import messages
 
 try:
     from product.models import Category, Product
 except ModuleNotFoundError:
     from products.models import Category, Product
 
+# from collections import defaultdict
+# from datetime import  timedelta
+from django.utils import timezone
+from .models import Order, OrderItem, WithdrawRequest
 
-def django_success_page(request):
-    return render(request, 'django_success.html')
+import json
 
+# def home_view(request):
+#     categories = Category.objects.all()
+#     influencers = CustomUser.objects.filter(user_type='influencer')
+#     products = Product.objects.all().select_related('category', 'influencer')[:12]
+#     context = {
+#         'categories': categories,
+#         'influencers': influencers,
+#         'products': products,
+#     }
+#     return render(request, 'home.html', context)
+
+
+# from django.shortcuts import render
+# from products.models import Category, Product
+# from accounts.models import CustomUser
+
+# def home_view(request):
+#     categories = Category.objects.all()
+#     influencers = CustomUser.objects.filter(user_type='influencer')
+#     products = Product.objects.select_related('category', 'influencer')[:12]
+
+#     # TEMPORARILY DISABLE REELS UNTIL VIDEO MODEL IS READY
+#     reels_videos = []  # No crash, no error
+
+#     context = {
+#         'categories': categories,
+#         'influencers': influencers,
+#         'products': products,
+#         'reels_videos': reels_videos,  # Safe empty list
+#     }
+#     return render(request, 'home.html', context)
+
+
+# In your views.py (products/views.py or accounts/views.py)
+# from accounts.models import CustomUser, InfluencerVideo
+# from products.models import Product, Category
 
 def home_view(request):
-    categories = Category.objects.all()[:10]
-    influencers = CustomUser.objects.filter(user_type='influencer', is_active=True).select_related(
-        'influencer_profile'
-    )[:10]
-    products = Product.objects.all().select_related('category', 'influencer')[:12]
-    videos = (
-        InfluencerVideo.objects.filter(is_active=True)
-        .select_related('influencer')
-        .prefetch_related('products')
-        .order_by('-created_at')[:10]
-    )
+    categories = Category.objects.all()
+    influencers = CustomUser.objects.filter(user_type='influencer')
+    products = Product.objects.select_related('category', 'influencer')[:12]
+
+    # FIXED: Use correct field names from your model
+    reels_videos = InfluencerVideo.objects.filter(is_active=True).order_by('-created_at')
+
     context = {
         'categories': categories,
         'influencers': influencers,
         'products': products,
-        'videos': videos,
+        'reels_videos': reels_videos,
     }
     return render(request, 'home.html', context)
-
-
 
 
 def register_influencer(request):
@@ -46,17 +88,27 @@ def register_influencer(request):
         form = InfluencerRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+                # Create an influencer application that needs admin approval
+
+            # Create a blank application for this user
+            InfluencerApplication.objects.create(
+                user=user,
+                is_approved=False  # By default, applications need approval
+            )
+
             try:
                 send_mail(
                     'Welcome to Influencify — Let’s Build Something Iconic!',
-                    f'Hi {user.username},\n\nWelcome to Influencify! Your journey as an influencer starts here. Collaborate, create, and inspire shoppers worldwide. Let’s build something iconic!',
+                    f'Hi {user.username},\n\nWelcome to Influencify! Your journey as an influencer starts here. Collaborate, create, and inspire shoppers worldwide. Let\'s build something iconic!\n\nPlease complete your influencer application to get started.',
                     'empireaeitservices8@gmail.com',
                     [user.email],
                     fail_silently=False,
                 )
             except Exception:
                 pass  # Log email failure if logging is configured
-            return redirect('login')
+
+            # Redirect to the application form to complete details
+            return redirect('influencer_application')
     else:
         form = InfluencerRegisterForm()
     return render(request, 'register_influencer.html', {'form': form})
@@ -77,11 +129,22 @@ def register_customer(request):
                 )
             except Exception:
                 pass  # Log email failure if logging is configured
-            return redirect('login')
+            # After successful registration, redirect to homepage
+            return redirect('home')
     else:
         form = CustomerRegisterForm()
     return render(request, 'register_customer.html', {'form': form})
 
+
+def register(request):
+    """Main registration view that allows user to choose between customer and influencer"""
+    return render(request, 'register.html')
+
+
+
+
+# from django.contrib.auth.forms import AuthenticationForm
+# from django.shortcuts import render, redirect
 
 def user_login(request):
     if request.method == 'POST':
@@ -89,64 +152,146 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            if user.user_type == 'influencer':
+
+            # CORRECT REDIRECTION LOGIC
+            if user.is_staff or user.is_superuser:           # Admin / Staff
+                return redirect('admin_dashboard')
+            elif user.user_type == 'influencer':             # Influencer
+                # Check if influencer has been approved
+                try:
+                    application = InfluencerApplication.objects.get(user=user)
+                    if not application.is_approved:
+                        messages.error(request, 'Your influencer application is pending approval. You will be notified once approved.')
+                        return redirect('home')
+                except InfluencerApplication.DoesNotExist:
+                    # If no application exists, redirect to application page
+                    messages.error(request, 'Please complete your influencer application first.')
+                    return redirect('influencer_application')
+
                 return redirect('influencer_dashboard')
-            return redirect('customer_dashboard')
+            else:                                             # Normal Customer
+                return redirect('customer_dashboard')
+
     else:
         form = AuthenticationForm()
+
     return render(request, 'login.html', {'form': form})
+# def user_login(request):
+#     if request.method == 'POST':
+#         form = AuthenticationForm(request, data=request.POST)
+#         if form.is_valid():
+#             user = form.get_user()
+#             login(request, user)
+#             if user.user_type == 'influencer':
+#                 return redirect('influencer_dashboard')
+#                 return redirect('admin_dashboard')
+#             return redirect('customer_dashboard')
+#     else:
+#         form = AuthenticationForm()
+#     return render(request, 'login.html', {'form': form})
 
 @login_required
 def influencer_dashboard(request):
     if request.user.user_type != 'influencer':
         return redirect('home')
 
+    # Check if influencer has been approved
+    try:
+        application = InfluencerApplication.objects.get(user=request.user)
+        if not application.is_approved:
+            messages.error(request, 'Your influencer application is pending approval. You will be notified once approved.')
+            return redirect('home')
+    except InfluencerApplication.DoesNotExist:
+        # If no application exists, redirect to application page
+        messages.error(request, 'Please complete your influencer application first.')
+        return redirect('influencer_application')
+
     influencer = request.user
 
-    # Handle video upload POST request
-    if request.method == 'POST':
-        title = request.POST.get('videoTitle')
-        description = request.POST.get('videoDescription')
-        video_file = request.FILES.get('videoFile')
-        thumbnail = request.FILES.get('videoThumbnail')
-        product_ids = request.POST.getlist('products')  # Get selected product IDs
+    # Get dashboard statistics with real data
+    from django.db.models import Sum, Count, Q, F
+    from django.utils import timezone
+    from datetime import timedelta
 
-        # Create video
-        video = InfluencerVideo.objects.create(
-            influencer=request.user,
-            title=title,
-            description=description,
-            video_file=video_file,
-            thumbnail=thumbnail
-        )
+    # Calculate total revenue from completed orders for this influencer
+    total_revenue = OrderItem.objects.filter(
+        product__influencer=influencer,
+        order__status=Order.COMPLETED
+    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
 
-        # Link selected products
-        if product_ids:
-            products = Product.objects.filter(id__in=product_ids, influencer=request.user)
-            video.products.set(products)
+    # Calculate total orders from completed orders for this influencer
+    total_orders = OrderItem.objects.filter(
+        product__influencer=influencer,
+        order__status=Order.COMPLETED
+    ).aggregate(total=Count('order', distinct=True))['total'] or 0
 
-        return redirect('influencer_dashboard')
+    # Calculate monthly revenue for current month
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+    monthly_revenue = OrderItem.objects.filter(
+        product__influencer=influencer,
+        order__status=Order.COMPLETED,
+        order__created_at__year=current_year,
+        order__created_at__month=current_month
+    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
 
-    # Get dashboard statistics (placeholder metrics - orders app not available)
-    total_revenue = 0
-    total_orders = 0
-    monthly_revenue = 0
-    monthly_orders = 0
+    # Calculate monthly orders for current month
+    monthly_orders = OrderItem.objects.filter(
+        product__influencer=influencer,
+        order__status=Order.COMPLETED,
+        order__created_at__year=current_year,
+        order__created_at__month=current_month
+    ).aggregate(total=Count('order', distinct=True))['total'] or 0
 
-    top_products = Product.objects.filter(influencer=influencer).select_related('category')[:5]
+    # Get top performing products for this influencer
+    top_products = Product.objects.filter(
+        influencer=influencer
+    ).annotate(
+        total_sales=Sum('account_order_items__quantity', filter=Q(account_order_items__order__status=Order.COMPLETED))
+    ).filter(
+        total_sales__isnull=False
+    ).order_by('-total_sales')[:5]
 
-    # Get influencer's videos and products for the template
-    videos = InfluencerVideo.objects.filter(influencer=request.user, is_active=True)
-    products = Product.objects.filter(influencer=request.user)
+    # Calculate revenue change percentage for progress bar
+    previous_month = current_month - 1 if current_month > 1 else 12
+    previous_year = current_year if current_month > 1 else current_year - 1
+
+    previous_month_revenue = OrderItem.objects.filter(
+        product__influencer=influencer,
+        order__status=Order.COMPLETED,
+        order__created_at__year=previous_year,
+        order__created_at__month=previous_month
+    ).aggregate(total=Sum(F('price') * F('quantity')))['total'] or 0
+
+    total_revenue_change = 0
+    if previous_month_revenue > 0:
+        total_revenue_change = min(100, int((total_revenue / previous_month_revenue) * 100))
+
+    # Calculate orders change percentage
+    previous_month_orders = OrderItem.objects.filter(
+        product__influencer=influencer,
+        order__status=Order.COMPLETED,
+        order__created_at__year=previous_year,
+        order__created_at__month=previous_month
+    ).aggregate(total=Count('order', distinct=True))['total'] or 0
+
+    total_orders_change = 0
+    if previous_month_orders > 0:
+        total_orders_change = min(100, int((total_orders / previous_month_orders) * 100))
+
+    monthly_revenue_change = 0
+    if previous_month_revenue > 0:
+        monthly_revenue_change = min(100, int((monthly_revenue / previous_month_revenue) * 100))
 
     context = {
         'total_revenue': total_revenue,
         'total_orders': total_orders,
         'monthly_revenue': monthly_revenue,
         'monthly_orders': monthly_orders,
+        'total_revenue_change': total_revenue_change,
+        'total_orders_change': total_orders_change,
+        'revenue_change': monthly_revenue_change,
         'top_products': top_products,
-        'videos': videos,
-        'products': products,
     }
     return render(request, 'influencer_dashboard.html', context)
 
@@ -249,12 +394,6 @@ def featured_influencers(request):
 def search_view(request):
     query = request.GET.get('q', '').strip()
     current_page = request.GET.get('page', '')
-    video_reels = (
-        InfluencerVideo.objects.filter(is_active=True)
-        .select_related('influencer')
-        .prefetch_related('products')
-        .order_by('-created_at')[:10]
-    )
 
     if not query:
         if current_page == 'customer_dashboard':
@@ -276,7 +415,6 @@ def search_view(request):
                 'influencers': influencers,
                 'products': products,
                 'categories': categories,
-                'videos': video_reels,
             })
         elif current_page == 'influencers':
             profiles = InfluencerProfile.objects.filter(user__is_active=True).select_related('user')
@@ -304,7 +442,6 @@ def search_view(request):
         'influencers': influencers,
         'products': products,
         'categories': Category.objects.all(),
-        'videos': video_reels,
     }
 
     if current_page == 'customer_dashboard':
@@ -318,3 +455,553 @@ def search_view(request):
 
 
 
+
+
+
+
+# @login_required
+# def upload_video(request):
+#     if request.user.user_type != 'influencer':
+#         return redirect('home')
+
+#     if request.method == 'POST':
+#         form = VideoUploadForm(request.POST, request.FILES, influencer=request.user)
+#         if form.is_valid():
+#             video = form.save()
+#             return redirect('manage_videos')
+#     else:
+#         form = VideoUploadForm(influencer=request.user)
+
+#     return render(request, 'upload_video.html', {'form': form})
+
+
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages   # ← THIS LINE WAS MISSING!
+
+@login_required
+def upload_video(request):
+    if request.user.user_type != 'influencer':
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = VideoUploadForm(request.POST, request.FILES, influencer=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Reel uploaded successfully! Your video is now live.")
+            return redirect('manage_videos')
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = VideoUploadForm(influencer=request.user)
+
+    return render(request, 'upload_video.html', {'form': form})
+
+@login_required
+def edit_video(request, video_id):
+    if request.user.user_type != 'influencer':
+        return redirect('home')
+
+    video = get_object_or_404(InfluencerVideo, id=video_id, influencer=request.user)
+
+    if request.method == 'POST':
+        form = VideoEditForm(request.POST, request.FILES, instance=video, influencer=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_videos')
+    else:
+        form = VideoEditForm(instance=video, influencer=request.user)
+
+    return render(request, 'edit_video.html', {
+        'form': form,
+        'video': video
+    })
+
+
+@login_required
+def manage_videos(request):
+    if request.user.user_type != 'influencer':
+        return redirect('home')
+
+    videos = InfluencerVideo.objects.filter(influencer=request.user).prefetch_related('products')
+
+    return render(request, 'manage_videos.html', {'videos': videos})
+
+
+@login_required
+def delete_video(request, video_id):
+    if request.user.user_type != 'influencer':
+        return redirect('home')
+
+    video = get_object_or_404(InfluencerVideo, id=video_id, influencer=request.user)
+
+    if request.method == 'POST':
+        video.delete()
+        return redirect('manage_videos')
+
+    return render(request, 'confirm_delete_video.html', {'video': video})
+
+
+@login_required
+def video_feed(request):
+    if request.user.user_type != 'influencer':
+        return redirect('home')
+
+    # Get videos for this influencer in chronological order for vertical feed
+    videos = InfluencerVideo.objects.filter(
+        influencer=request.user,
+        is_active=True
+    ).prefetch_related('products').order_by('-created_at')
+
+    return render(request, 'video_feed.html', {'videos': videos})
+
+
+# from django.db.models import Sum
+from django.db.models.functions import TruncMonth
+# … your other imports (timezone, timedelta, json, messages, redirect, etc.) …
+
+
+
+from django.contrib.auth.decorators import login_required
+
+def admin_dashboard(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    today = timezone.now()
+
+    # 1. Total revenue & commission
+    total_revenue = Order.objects.filter(status='Completed').aggregate(
+        total=Sum('total_amount')
+    )['total'] or 0
+
+    total_commission = Order.objects.filter(status='Completed').aggregate(
+        total=Sum('commission_amount')
+    )['total'] or 0
+
+    commission_percentage = round((total_commission / total_revenue * 100), 2) if total_revenue else 0
+    total_influencer_earnings = total_revenue - total_commission
+
+    # Counts
+    active_influencers = CustomUser.objects.filter(user_type='influencer', is_active=True).count()
+    active_customers = CustomUser.objects.filter(user_type='customer', is_active=True).count()
+    pending_influencer_approvals = CustomUser.objects.filter(user_type='influencer', is_active=False)
+    pending_orders = Order.objects.filter(status='Pending').count()
+
+    # Additional influencer management data
+    all_influencers = CustomUser.objects.filter(user_type='influencer').select_related('influencer_profile')
+    approved_influencers = CustomUser.objects.filter(user_type='influencer', is_active=True)
+    rejected_influencers = CustomUser.objects.filter(user_type='influencer', is_active=False)
+    pending_applications = InfluencerApplication.objects.filter(is_approved=False)
+    approved_applications = InfluencerApplication.objects.filter(is_approved=True)
+
+    # 7. Monthly revenue – last 12 months
+    monthly_data = Order.objects.filter(
+        status='Completed',
+        created_at__year__gte=today.year - 1
+    ).annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        revenue=Sum('total_amount')
+    ).order_by('month')
+
+    monthly_labels = []
+    monthly_values = []
+    data_dict = {item['month'].strftime('%Y-%m'): item['revenue'] or 0 for item in monthly_data}
+
+    current = today.replace(day=1)
+    for _ in range(12):
+        key = current.strftime('%Y-%m')
+        monthly_labels.append(current.strftime('%b %Y'))
+        monthly_values.append(float(data_dict.get(key, 0)))
+        if current.month == 1:
+            current = current.replace(year=current.year - 1, month=12)
+        else:
+            current = current.replace(month=current.month - 1)
+
+    monthly_labels.reverse()
+    monthly_values.reverse()
+
+    # 8. Top 5 influencers by earnings
+    influencer_earnings = {}
+    orders = Order.objects.filter(status='Completed') \
+        .defer('address') \
+        .select_related('user') \
+        .prefetch_related('items__product__influencer')
+
+    for order in orders:
+        for item in order.items.all():
+            influencer = getattr(item.product, 'influencer', None)
+            if not influencer:
+                continue
+            earnings = item.price * item.quantity * (1 - order.commission_percentage / 100)
+
+            if influencer.id not in influencer_earnings:
+                influencer_earnings[influencer.id] = {'user': influencer, 'total_earnings': 0}
+            influencer_earnings[influencer.id]['total_earnings'] += earnings
+
+    top_influencers = sorted(influencer_earnings.values(),
+                             key=lambda x: x['total_earnings'], reverse=True)[:5]
+
+    # 9. FINAL BULLETPROOF TOP PRODUCTS — NO JOIN, NO product_id, NO ERROR EVER
+    top_products = []
+    try:
+        from collections import Counter
+
+        # Try to get product name directly from OrderItem (if you have a denormalized field)
+        raw_items = OrderItem.objects.filter(order__status='Completed') \
+            .values('product_name', 'quantity')
+
+        # If product_name doesn't exist, fall back to empty
+        if not raw_items or 'product_name' not in raw_items[0]:
+            raise Exception("No product_name field")
+
+        product_sales = Counter()
+        for item in raw_items:
+            name = item['product_name'] or "Unknown Product"
+            qty = item['quantity'] or 0
+            product_sales[name] += qty
+
+        top_products = [
+            {'product__name': name, 'total_sold': count}
+            for name, count in product_sales.most_common(5)
+        ]
+
+    except Exception:
+        # Ultimate fallback — just show empty list, dashboard NEVER crashes
+        top_products = []
+
+    # 10. Pending withdraw requests — SAFE
+    pending_withdraw_requests = WithdrawRequest.objects.filter(status='pending').values(
+        'id', 'amount', 'status', 'created_at'
+    )
+
+    # POST handling for admin actions
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'approve_influencer':
+            user_id = request.POST.get('user_id')
+            user = get_object_or_404(CustomUser, id=user_id)
+            # Ensure user is active and has the correct user type
+            user.is_active = True
+            user.user_type = 'influencer'
+            user.save()
+
+            # Also approve their application if it exists
+            try:
+                application = InfluencerApplication.objects.get(user=user)
+                application.is_approved = True
+                application.reviewed_by = request.user
+                application.reviewed_at = timezone.now()
+                application.save()
+            except InfluencerApplication.DoesNotExist:
+                pass
+
+            messages.success(request, f'Influencer {user.username} has been approved successfully.')
+
+        elif action == 'deny_influencer':
+            user_id = request.POST.get('user_id')
+            user = get_object_or_404(CustomUser, id=user_id)
+            # Set user as inactive but maintain user type as influencer
+            user.is_active = False
+            user.save()
+
+            # Also update their application status if it exists
+            try:
+                application = InfluencerApplication.objects.get(user=user)
+                application.is_approved = False
+                application.reviewed_by = request.user
+                application.reviewed_at = timezone.now()
+                application.save()
+            except InfluencerApplication.DoesNotExist:
+                pass
+
+            messages.success(request, f'Influencer {user.username} has been denied.')
+
+        elif action == 'approve_withdraw':
+            request_id = request.POST.get('request_id')
+            withdraw_request = get_object_or_404(WithdrawRequest, id=request_id)
+            withdraw_request.status = 'approved'
+            withdraw_request.approved_at = timezone.now()
+            withdraw_request.approved_by = request.user
+            withdraw_request.save()
+
+            messages.success(request, f'Withdraw request for ₹{withdraw_request.amount} has been approved.')
+
+        elif action == 'deny_withdraw':
+            request_id = request.POST.get('request_id')
+            reason = request.POST.get('reason', '')
+            withdraw_request = get_object_or_404(WithdrawRequest, id=request_id)
+            withdraw_request.status = 'rejected'
+            withdraw_request.reason = reason
+            withdraw_request.approved_at = timezone.now()
+            withdraw_request.approved_by = request.user
+            withdraw_request.save()
+
+            messages.success(request, f'Withdraw request for ₹{withdraw_request.amount} has been denied.')
+
+        return redirect('admin_dashboard')
+
+    context = {
+        'total_revenue': total_revenue,
+        'total_commission': total_commission,
+        'commission_percentage': commission_percentage,
+        'total_influencer_earnings': total_influencer_earnings,
+        'active_influencers': active_influencers,
+        'active_customers': active_customers,
+        'pending_influencer_approvals': pending_influencer_approvals,
+        'pending_influencer_approvals_count': pending_influencer_approvals.count(),
+        'pending_orders': pending_orders,
+        'monthly_revenue_labels': json.dumps(monthly_labels),
+        'monthly_revenue_values': json.dumps(monthly_values),
+        'top_influencers': top_influencers,
+        'top_products': top_products,
+        'pending_withdraw_requests': pending_withdraw_requests,
+        'all_influencers': all_influencers,
+        'approved_influencers': approved_influencers,
+        'rejected_influencers': rejected_influencers,
+        'pending_applications': pending_applications,
+        'approved_applications': approved_applications,
+    }
+
+    return render(request, 'admin_dashboard.html', context)
+
+# accounts/views.py
+# from django.shortcuts import render
+# from orders.models import Order
+
+def order_tracking(request):
+    order = None
+    searched = False
+
+    if request.GET.get('order_id'):
+        searched = True
+        try:
+            # FIXED: Use 'id' instead of 'order_id'
+            order = Order.objects.get(id=request.GET['order_id'])
+        except (Order.DoesNotExist, ValueError):
+            order = None
+
+    return render(request, 'order_tracking.html', {
+        'order': order,
+        'searched': searched
+    })
+
+
+@login_required
+def manage_influencers(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    # Handle POST requests for approval/denial actions
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        user_id = request.POST.get('user_id')
+
+        if action and user_id:
+            try:
+                user = get_object_or_404(CustomUser, id=user_id, user_type='influencer')
+
+                if action == 'approve_influencer':
+                    # Approve the influencer
+                    user.is_active = True
+                    user.user_type = 'influencer'
+                    user.save()
+
+                    # Update application status
+                    try:
+                        application = InfluencerApplication.objects.get(user=user)
+                        application.is_approved = True
+                        application.reviewed_by = request.user
+                        application.reviewed_at = timezone.now()
+                        application.save()
+                        messages.success(request, f'Influencer {user.username} has been approved successfully.')
+                    except InfluencerApplication.DoesNotExist:
+                        messages.success(request, f'Influencer {user.username} has been approved successfully.')
+
+                elif action == 'deny_influencer':
+                    # Deny the influencer
+                    user.is_active = False
+                    user.save()
+
+                    # Update application status
+                    try:
+                        application = InfluencerApplication.objects.get(user=user)
+                        application.is_approved = False
+                        application.reviewed_by = request.user
+                        application.reviewed_at = timezone.now()
+                        application.save()
+                        messages.success(request, f'Influencer {user.username} has been denied.')
+                    except InfluencerApplication.DoesNotExist:
+                        messages.success(request, f'Influencer {user.username} has been denied.')
+            except CustomUser.DoesNotExist:
+                messages.error(request, 'User not found.')
+
+        return redirect('manage_influencers')
+
+    # Get all influencers with their applications and profiles
+    influencers = CustomUser.objects.filter(user_type='influencer').select_related('influencer_profile')
+    pending_applications = InfluencerApplication.objects.filter(is_approved=False)
+    approved_applications = InfluencerApplication.objects.filter(is_approved=True)
+
+    context = {
+        'influencers': influencers,
+        'pending_applications': pending_applications,
+        'approved_applications': approved_applications,
+    }
+
+    return render(request, 'manage_influencers.html', context)
+
+
+@login_required
+def toggle_influencer_status(request, user_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        user = get_object_or_404(CustomUser, id=user_id, user_type='influencer')
+        # Toggle the active status
+        user.is_active = not user.is_active
+        user.save()
+
+        messages.success(request, f'Influencer status updated successfully.')
+
+    return redirect('manage_influencers')
+
+
+@login_required
+def view_influencer_details(request, user_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    influencer = get_object_or_404(CustomUser, id=user_id, user_type='influencer')
+    profile = getattr(influencer, 'influencer_profile', None)
+    application = getattr(influencer, 'influencer_application', None)
+
+    # Get influencer's products and videos
+    products = Product.objects.filter(influencer=influencer)
+    videos = InfluencerVideo.objects.filter(influencer=influencer)
+
+    context = {
+        'influencer': influencer,
+        'profile': profile,
+        'application': application,
+        'products': products,
+        'videos': videos,
+    }
+
+    return render(request, 'influencer_details.html', context)
+
+
+@login_required
+def delete_influencer(request, user_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    influencer = get_object_or_404(CustomUser, id=user_id, user_type='influencer')
+
+    if request.method == 'POST':
+        # Delete related data first
+        InfluencerProfile.objects.filter(user=influencer).delete()
+        InfluencerVideo.objects.filter(influencer=influencer).delete()
+        WithdrawRequest.objects.filter(influencer=influencer).delete()
+        # Also delete any related influencer applications
+        InfluencerApplication.objects.filter(user=influencer).delete()
+
+        # Delete the user account
+        influencer.delete()
+
+        messages.success(request, 'Influencer account has been deleted successfully.')
+        return redirect('manage_influencers')
+
+    # If GET request, show confirmation page
+    context = {
+        'influencer': influencer
+    }
+    return render(request, 'confirm_delete_influencer.html', context)
+
+
+@login_required
+def influencer_earnings(request):
+    if request.user.user_type != 'influencer':
+        return redirect('home')
+
+    # Get all orders for this influencer's products
+    influencer_orders = OrderItem.objects.filter(
+        product__influencer=request.user,
+        order__status=Order.COMPLETED
+    ).select_related('order', 'product')
+
+    # Calculate total earnings
+    total_earnings = sum([
+        float(item.price) * item.quantity * (1 - float(item.order.commission_percentage) / 100)
+        for item in influencer_orders
+    ])
+
+    # Get withdraw requests for this influencer
+    withdraw_requests = WithdrawRequest.objects.filter(influencer=request.user).order_by('-created_at')
+
+    # Calculate pending withdrawals
+    pending_withdrawals = WithdrawRequest.objects.filter(
+        influencer=request.user,
+        status='pending'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    context = {
+        'total_earnings': total_earnings,
+        'pending_withdrawals': pending_withdrawals,
+        'withdraw_requests': withdraw_requests,
+        'influencer_orders': influencer_orders,
+    }
+
+    return render(request, 'influencer_earnings.html', context)
+
+
+@login_required
+def request_withdrawal(request):
+    if request.user.user_type != 'influencer':
+        return redirect('home')
+
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        try:
+            amount = float(amount)
+            # Create a withdraw request
+            WithdrawRequest.objects.create(
+                influencer=request.user,
+                amount=amount,
+                status='pending'
+            )
+            messages.success(request, 'Withdrawal request submitted successfully!')
+        except ValueError:
+            messages.error(request, 'Invalid amount entered.')
+
+        return redirect('influencer_earnings')
+
+    return redirect('influencer_earnings')
+
+
+def influencer_application(request):
+    from .models import InfluencerApplication
+    from .forms import InfluencerApplicationForm
+
+    # Get the current user's application
+    application, created = InfluencerApplication.objects.get_or_create(
+        user=request.user,
+        defaults={'is_approved': False}
+    )
+
+    if request.method == 'POST':
+        form = InfluencerApplicationForm(request.POST, request.FILES, instance=application, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your influencer application has been submitted successfully. Our team will review it shortly.')
+            return redirect('influencer_application_success')
+    else:
+        form = InfluencerApplicationForm(instance=application, user=request.user)
+
+    return render(request, 'influencer_application.html', {'form': form})
+
+
+def influencer_application_success(request):
+    return render(request, 'influencer_application_success.html')
