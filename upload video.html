@@ -1,0 +1,211 @@
+
+
+
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Reel - Lumoskart</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root {
+            --primary-black: #000000;
+            --secondary-black: #1a1a1a;
+            --dark-grey: #333333;
+            --medium-grey: #666666;
+            --light-grey: #cccccc;
+            --bg-grey: #f5f5f5;
+            --white: #ffffff;
+            --border-grey: #e0e0e0;
+            --primary-blue: #007bff;
+            --success-green: #28a745;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-grey);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background-color: var(--primary-black);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { color: white; font-weight: 700; text-decoration: none; font-size: 1.5rem; }
+        .nav-menu { list-style: none; display: flex; gap: 2rem; margin: 0; }
+        .nav-item a { color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; }
+        .nav-item a:hover { background: var(--dark-grey); }
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; flex: 1; }
+        .upload-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .upload-header {
+            background: linear-gradient(135deg, #000, #1a1a1a);
+            color: white;
+            padding: 2.5rem;
+            text-align: center;
+        }
+        .upload-header h2 { margin: 0; font-size: 2rem; font-weight: 700; }
+        .upload-content { padding: 2.5rem; }
+        .form-group { margin-bottom: 1.8rem; }
+        .form-label { font-weight: 600; color: var(--dark-grey); margin-bottom: 0.5rem; display: block; }
+        .form-control, .form-control-file {
+            padding: 0.9rem;
+            border: 1px solid var(--border-grey);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid var(--border-grey);
+        }
+        .product-item {
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.3s;
+        }
+        .product-item:hover { border-color: var(--primary-blue); transform: translateY(-4px); }
+        .product-item img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; }
+        .btn-primary {
+            background: var(--primary-blue);
+            padding: 0.9rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-secondary { background: #6c757d; border-radius: 50px; padding: 0.9rem 2rem; }
+        .footer {
+            background: var(--primary-black);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+        @media (max-width: 768px) {
+            .upload-header h2 { font-size: 1.6rem; }
+            .upload-content { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="{% static 'accounts/images/lumoskart-logo.png' %}" alt="Lumoskart" height="32">
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="{% url 'influencer_dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a href="{% url 'manage_videos' %}">My Reels</a></li>
+                <li class="nav-item"><a href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="upload-card">
+            <div class="upload-header">
+                <h2>Upload New Reel</h2>
+            </div>
+            <div class="upload-content">
+
+                <!-- THE MAGIC FORM — USING {{ form.as_p }} BUT STILL BEAUTIFUL -->
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Show Django form with nice styling -->
+                    {{ form.as_p }}
+
+                    <!-- Custom styled product tagging (from your form) -->
+                    <div class="form-group">
+                        <label class="form-label">Tag Your Products (Optional)</label>
+                        <div class="products-grid">
+                            {% for product in form.products.queryset %}
+                                <div class="product-item">
+                                    <input type="checkbox" name="products" value="{{ product.id }}" id="prod{{ product.id }}">
+                                    <label for="prod{{ product.id }}" style="cursor:pointer; margin:0;">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                        {% endif %}
+                                        <p style="margin:0.5rem 0 0; font-size:0.9rem;">{{ product.name }}</p>
+                                    </label>
+                                </div>
+                            {% empty %}
+                                <p class="text-center text-muted w-100">No products yet. <a href="{% url 'add_product' %}">Add one</a></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Error messages -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Please fix the following:</strong>
+                            <ul>
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Success message -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">Upload Reel</button>
+                        <a href="{% url 'manage_videos' %}" class="btn btn-secondary ml-3">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2025 Lumoskart. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
+<!--</html>-->
