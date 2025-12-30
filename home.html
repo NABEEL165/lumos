@@ -1711,7 +1711,7 @@
                     <div class="video-thumbnail"
                          style="cursor:pointer"
                          onclick="playVideo('{{ video.video_file.url }}')">
-
+    
                         {% if video.thumbnail %}
                             <img src="{{ video.thumbnail.url }}"
                                  class="img-fluid rounded"
@@ -1722,7 +1722,7 @@
                                 ▶ Play Video
                             </div>
                         {% endif %}
-
+    
                     </div>
                 </div>
                 {% endif %}
@@ -1740,6 +1740,9 @@
     .product-influencer {
         font-size: 0.85rem;
         color: #bbb;
+        margin: 8px 0;
+        font-style: italic;
+        display: block;
     }
 
     .product-price {
@@ -3464,6 +3467,13 @@
             font-size: 14px;
         }
     }
+    .product-influencer {
+    font-size: 0.85rem;
+    color: black;
+    margin: 8px 0;
+    font-style: italic;
+    display: block;
+}
 </style>
 
 <body>
@@ -3670,13 +3680,18 @@
                         <div class="category-badge">{{ product.category.name }}</div>
 
                         {% if product.influencer %}
-
-     <div class="promoted-badge">PROMOTED BY {{
+                        <div class="promoted-badge">PROMOTED BY {{
                             product.influencer.get_full_name|default:product.influencer.username|upper }}</div>
                         {% endif %}
                     </div>
+
                     <div class="product-details">
                         <h3 class="product-title">{{ product.name }}</h3>
+
+                        <!-- Influencer Name -->
+                        {% if product.influencer %}
+                        <p class="product-influencer">By {{ product.influencer.get_full_name|default:product.influencer.username }}</p>
+                        {% endif %}
 
                         <!-- Product Description -->
                         {% if product.description %}
@@ -3750,8 +3765,14 @@
                         {% endif %}
                     </div>
 
+
                     <div class="product-details">
                         <h3 class="product-title">{{ product.name }}</h3>
+
+                        <!-- Influencer Name -->
+                        {% if product.influencer %}
+                        <p class="product-influencer">By {{ product.influencer.get_full_name|default:product.influencer.username }}</p>
+                        {% endif %}
 
                         {% if product.description %}
                         <p class="product-description">{{ product.description|truncatewords:15 }}</p>
