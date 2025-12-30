@@ -410,49 +410,52 @@
         /* New Reel Card Styles based on image */
         .reel-discount-badge {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #b91c1c;
-            /* Crimson/Red */
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
             color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 700;
-            z-index: 5;
+            z-index: 6;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
         }
 
         .reel-views-badge {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.6);
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
             color: white;
-            padding: 2px 10px;
+            padding: 4px 10px;
             border-radius: 12px;
             font-size: 0.75rem;
             display: flex;
             align-items: center;
             gap: 5px;
-            z-index: 5;
+            z-index: 6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .reel-product-overlay {
             position: absolute;
-            bottom: 55px;
-            /* Leave space for add to cart button */
-            left: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            bottom: 50px;
+            /* Space for Buy Now button */
+            left: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 12px;
             padding: 10px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             z-index: 5;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         .reel-product-thumb {
@@ -460,38 +463,41 @@
             height: 45px;
             border-radius: 8px;
             object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            flex-shrink: 0;
         }
 
         .reel-product-info {
             flex: 1;
             min-width: 0;
+            overflow: hidden;
         }
 
         .reel-product-name {
             color: white;
             font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.2;
         }
 
         .reel-product-price-row {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .reel-current-price {
-            color: white;
+            color: #10b981;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
         }
 
         .reel-original-price {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
             text-decoration: line-through;
             font-size: 0.75rem;
         }
@@ -501,31 +507,45 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 45px;
-            background: #e11d48;
-            /* Bright red */
+            height: 48px;
+            background: linear-gradient(135deg, #e11d48, #be123c);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-            gap: 5px;
-            z-index: 5;
+            font-weight: 700;
+            font-size: 0.95rem;
+            gap: 6px;
+            z-index: 6;
             text-decoration: none;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
             border: none;
             width: 100%;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            box-shadow: 0 -2px 10px rgba(225, 29, 72, 0.3);
         }
 
         .reel-add-to-cart-bar:hover {
-            background: #be123c;
+            background: linear-gradient(135deg, #be123c, #9f1239);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 -4px 16px rgba(225, 29, 72, 0.5);
         }
 
-        .reel-add-to-cart-bar i.fa-caret-down {
-            font-size: 0.7rem;
-            margin-left: 2px;
+        .reel-add-to-cart-bar i {
+            font-size: 0.9rem;
+        }
+
+        .reel-add-to-cart-bar.disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .reel-add-to-cart-bar.disabled:hover {
+            transform: none;
+            box-shadow: none;
         }
 
         /* Video Shorts Player */
@@ -1048,8 +1068,12 @@
             }
 
             .reels-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 1rem;
+                gap: 12px;
+                padding: 10px 5px;
+            }
+
+            .reel-widget-card {
+                width: 160px;
             }
 
             .instagram-reels-widget {
@@ -1111,7 +1135,12 @@
             }
 
             .reels-grid {
-                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 10px;
+                padding: 10px 5px;
+            }
+
+            .reel-widget-card {
+                width: 140px;
             }
 
             .navbar-brand img {
@@ -2960,27 +2989,89 @@
         margin: 40px 10px;
     }
 
-    .reels-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 12px;
-        padding: 10px 5px;
+    /* Video Shorts Section Improvements */
+    .video-shorts-section {
+        position: relative;
+        padding: 20px 0;
     }
 
-    .reel-widget-card {
-        aspect-ratio: 9/16;
+    .video-shorts-section .section-header {
+        margin-bottom: 25px;
+        padding: 0 10px;
+    }
+
+    .video-shorts-section .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #e3e3e3;
+        margin-bottom: 8px;
+    }
+
+    .video-shorts-section .section-description {
+        color: #b3b3b3;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Horizontal Scrolling Container */
+    .reels-grid {
+        display: flex;
+        gap: 16px;
+        padding: 15px 10px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #333 #111;
+    }
+
+    /* Custom Scrollbar for Reels Grid */
+    .reels-grid::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .reels-grid::-webkit-scrollbar-track {
         background: #111;
+        border-radius: 10px;
+        margin: 0 10px;
+    }
+
+    .reels-grid::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+
+    .reels-grid::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* Reel Card Improvements */
+    .reel-widget-card {
+        position: relative;
+        flex: 0 0 auto;
+        width: 200px;
+        aspect-ratio: 9/16;
+        background: #1a1a1a;
+        border-radius: 16px;
+        overflow: hidden;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .reel-widget-card:hover {
-        transform: scale(1.05);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
         z-index: 10;
     }
 
     .reel-widget-card video {
-        border-radius: 12px;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 16px;
     }
 
     .play-icon-overlay {
@@ -3438,7 +3529,7 @@
 
 
 
-        <!-- Top Selling Products -->
+          <!-- Top Selling Products -->
             <section class="artist-section">
                 <div class="section-title-bar">
                     <h2>Top Selling Products</h2>
@@ -3513,7 +3604,8 @@
                     <!-- Video Background -->
                     <a href="javascript:void(0);" class="text-decoration-none video-shorts-item"
                         data-video-url="{{ video.video_file.url }}" data-video-title="{{ video.title }}"
-                        data-video-influencer="{{ video.influencer.username }}" data-video-influencer-id="{{ video.influencer.id }}"
+                        data-video-influencer="{{ video.influencer.username }}"
+                        data-video-influencer-id="{{ video.influencer.id }}"
                         data-video-likes="{{ video.likes|default:0 }}" data-video-views="{{ video.views|default:0 }}"
                         data-video-products='{% for prod in video.products.all %}{"id": {{ prod.id }}, "name": "{{ prod.name }}", "price": {{ prod.price }}, "image": "{{ prod.image.url|default:"" }}", "influencer_id": {{ video.influencer.id }}}{% if not forloop.last %},{% endif %}{% endfor %}'>
                         <video class="w-100 h-100 object-fit-cover" muted autoplay loop playsinline preload="metadata">
@@ -3547,12 +3639,16 @@
 
                     <!-- Add to Cart / Buy Now Bar -->
                     {% if product %}
-                    <a href="{% url 'view_influencer_products' product.influencer.id %}" class="reel-add-to-cart-bar buy-now-btn">
+                    <a href="{% url 'view_influencer_products' product.influencer.id %}"
+                        class="reel-add-to-cart-bar buy-now-btn">
                         Buy Now <i class="fas fa-caret-down"></i>
                     </a>
                     {% else %}
                     <div class="reel-add-to-cart-bar disabled" style="opacity: 0.5; cursor: not-allowed;">
-                        No product
+                        <a href="javascript:void(0);" class="video-shorts-action-btn video-shorts-buy"
+                                id="video-shorts-buy-btn">
+                                <i class="fas fa-shopping-cart"></i> Buy Now
+                            </a>
                     </div>
                     {% endif %}
                     {% endwith %}
@@ -3569,6 +3665,17 @@
 
         <!-- Video Shorts Player Modal -->
         <div class="video-shorts-player">
+            <div class="video-shorts-content">
+                <div class="video-shorts-video-container">
+                    <video class="video-shorts-video" muted playsinline controls></video>
+                    <div class="video-shorts-overlay">
+                        <div class="video-shorts-header">
+                            <div class="video-shorts-title"></div>
+                            <button class="video-shorts-close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                         <div class="video-shorts-player">
             <div class="video-shorts-content">
                 <div class="video-shorts-video-container">
                     <video class="video-shorts-video" muted playsinline controls></video>
@@ -3597,6 +3704,21 @@
                                 <i class="fas fa-shopping-cart"></i> Buy Now
                             </a>
                         </div>
+                    </div>
+                    <div class="video-shorts-pagination">
+                        <div class="video-shorts-pagination-dot active"></div>
+                        <div class="video-shorts-pagination-dot"></div>
+                        <div class="video-shorts-pagination-dot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                        <div class="video-shorts-product-info">
+                            <h3 class="video-shorts-product-name"></h3>
+                            <p class="video-shorts-influencer"></p>
+                            <p class="video-shorts-description"></p>
+                        </div>
+                        <div class="video-shorts-products"></div>
                     </div>
                     <div class="video-shorts-pagination">
                         <div class="video-shorts-pagination-dot active"></div>
@@ -3724,7 +3846,7 @@
                             // Button has a URL, let it navigate normally
                             return;
                         }
-                        
+
                         e.preventDefault();
 
                         // Get the video item that contains this button
@@ -4398,10 +4520,10 @@
                     const currentVideoItem = allVideoItems[currentIndex];
                     if (currentVideoItem) {
                         const productsData = currentVideoItem.getAttribute('data-video-products');
-                        
+
                         // Get influencer ID from the video element
                         let influencerId = currentVideoItem.getAttribute('data-video-influencer-id');
-                        
+
                         if (influencerId) {
                             // Redirect to influencer products page
                             window.location.href = `/products/influencer/${influencerId}/products/`;
