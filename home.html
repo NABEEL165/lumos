@@ -326,15 +326,17 @@
             position: absolute;
             top: 12px;
             left: 12px;
-            background: #818cf8;
+            background: linear-gradient(135deg, #818cf8, #6366f1);
             color: white;
             font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 12px;
+            font-weight: 700;
+            padding: 6px 14px;
             border-radius: 20px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             z-index: 2;
+            box-shadow: 0 4px 12px rgba(129, 140, 248, 0.4);
+            text-align: center;
         }
 
         .product-details {
@@ -3467,13 +3469,6 @@
             font-size: 14px;
         }
     }
-    .product-influencer {
-    font-size: 0.85rem;
-    color: black;
-    margin: 8px 0;
-    font-style: italic;
-    display: block;
-}
 </style>
 
 <body>
@@ -3680,8 +3675,7 @@
                         <div class="category-badge">{{ product.category.name }}</div>
 
                         {% if product.influencer %}
-                        <div class="promoted-badge">PROMOTED BY {{
-                            product.influencer.get_full_name|default:product.influencer.username|upper }}</div>
+                        <div class="promoted-badge">{{ product.influencer.username|upper }}</div>
                         {% endif %}
                     </div>
 
@@ -3690,7 +3684,7 @@
 
                         <!-- Influencer Name -->
                         {% if product.influencer %}
-                        <p class="product-influencer">By {{ product.influencer.get_full_name|default:product.influencer.username }}</p>
+                        <p class="product-influencer">{{ product.influencer.username }}</p>
                         {% endif %}
 
                         <!-- Product Description -->
@@ -3760,18 +3754,16 @@
                         {% endif %}
 
                         {% if product.influencer %}
-                        <div class="promoted-badge">PROMOTED BY {{
-                            product.influencer.get_full_name|default:product.influencer.username|upper }}</div>
+                        <div class="promoted-badge">{{ product.influencer.username|upper }}</div>
                         {% endif %}
                     </div>
-
 
                     <div class="product-details">
                         <h3 class="product-title">{{ product.name }}</h3>
 
                         <!-- Influencer Name -->
                         {% if product.influencer %}
-                        <p class="product-influencer">By {{ product.influencer.get_full_name|default:product.influencer.username }}</p>
+                        <p class="product-influencer">{{ product.influencer.username }}</p>
                         {% endif %}
 
                         {% if product.description %}
