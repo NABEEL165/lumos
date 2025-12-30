@@ -1711,7 +1711,7 @@
                     <div class="video-thumbnail"
                          style="cursor:pointer"
                          onclick="playVideo('{{ video.video_file.url }}')">
-    
+
                         {% if video.thumbnail %}
                             <img src="{{ video.thumbnail.url }}"
                                  class="img-fluid rounded"
@@ -1722,7 +1722,7 @@
                                 ▶ Play Video
                             </div>
                         {% endif %}
-    
+
                     </div>
                 </div>
                 {% endif %}
@@ -3281,6 +3281,121 @@
         color: #e91e63;
     }
 
+    /* Category Section Styles */
+    .category-section {
+        margin-bottom: 50px;
+        padding: 30px 0;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .category-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .category-description {
+        color: #b3b3b3;
+        font-size: 0.95rem;
+        margin-top: 5px;
+        margin-bottom: 0;
+    }
+
+    /* Category Badge */
+    .category-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 3;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Product Description */
+    .product-description {
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin: 8px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    /* Size Information */
+    .product-size-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.85rem;
+        margin: 6px 0;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        width: fit-content;
+    }
+
+    .product-size-info i {
+        font-size: 0.9rem;
+        color: #10b981;
+    }
+
+    /* Enhanced Rating Display */
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 6px 0;
+    }
+
+    .rating-count {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.8rem;
+        margin-left: 4px;
+    }
+
+    /* Enhanced Price Section */
+    .price-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .original-price {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        text-decoration: line-through;
+    }
+
+    .discount-badge {
+        background: #10b981;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /* Improved Product Footer */
+    .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
     /* Responsive adjustments */
     @media (max-width: 992px) {
         .products-grid {
@@ -3527,66 +3642,161 @@
             </div>
         </section>
 
-  <!-- Top Selling Products -->
-            <section class="artist-section">
-                <div class="section-title-bar">
-                    <h2>Top Selling Products</h2>
-                    <a href="{% url 'product_lists' %}" class="view-all-btn">View More</a>
+
+
+        <!-- Products by Category (Amazon/Flipkart Style) -->
+        {% for category, category_products in products_by_category.items %}
+        <section class="artist-section category-section">
+            <div class="section-title-bar">
+                <div>
+                    <h2>{{ category.name }}</h2>
+                    <p class="category-description">Explore our collection of {{ category.name|lower }}</p>
                 </div>
-                <div class="products-grid">
-                    {% for product in products %}
-                        <div class="product-card" data-product-id="{{ product.id }}" data-category-id="{{ product.category.id|default:'0' }}">
-                            <div class="product-img-wrapper">
-                                {% if product.image %}
-                                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                <a href="{% url 'product_lists' %}?category={{ category.id }}" class="view-all-btn">View All {{
+                    category.name }}</a>
+            </div>
+            <div class="products-grid">
+                {% for product in category_products %}
+                <div class="product-card" data-product-id="{{ product.id }}"
+                    data-category-id="{{ product.category.id|default:'0' }}">
+                    <div class="product-img-wrapper">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                        <img src="{% static 'images/product-placeholder.jpg' %}" alt="Product Image">
+                        {% endif %}
+
+                        <!-- Category Badge -->
+                        <div class="category-badge">{{ product.category.name }}</div>
+
+                        {% if product.influencer %}
+
+     <div class="promoted-badge">PROMOTED BY {{
+                            product.influencer.get_full_name|default:product.influencer.username|upper }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-title">{{ product.name }}</h3>
+
+                        <!-- Product Description -->
+                        {% if product.description %}
+                        <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                        {% endif %}
+
+                        <!-- Size Information -->
+                        {% if product.size %}
+                        <div class="product-size-info">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>Size: {{ product.size }}</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Optional rating -->
+                        {% if product.rating %}
+                        <div class="rating">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= product.rating %} <span class="star filled">★</span>
                                 {% else %}
-                                    <img src="{% static 'images/product-placeholder.jpg' %}" alt="Product Image">
+                                <span class="star">☆</span>
                                 {% endif %}
+                                {% endfor %}
+                                <span class="rating-count">({{ product.rating }})</span>
+                        </div>
+                        {% endif %}
 
-                                {% if product.influencer %}
-                                    <div class="promoted-badge">PROMOTED BY {{ product.influencer.get_full_name|default:product.influencer.username|upper }}</div>
+                        <div class="product-footer">
+                            <div class="price-section">
+                                <span class="product-price">₹{{ product.price }}</span>
+                                {% if product.original_price %}
+                                <span class="original-price">₹{{ product.original_price }}</span>
+                                <span class="discount-badge">{% widthratio product.price product.original_price 100 %}%
+                                    OFF</span>
                                 {% endif %}
                             </div>
-
-                            <div class="product-details">
-                                <h3 class="product-title">{{ product.name }}</h3>
-
-                                <!-- Optional rating (add a rating field to your model if needed) -->
-                                {% if product.rating %}
-                                    <div class="rating">
-                                        {% for i in "12345" %}
-                                            {% if forloop.counter <= product.rating %}
-                                                <span class="star filled">★</span>
-                                            {% else %}
-                                                <span class="star">☆</span>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-
-                                <div class="product-footer">
-                                    <span class="product-price">₹{{ product.price }}</span>
-                                    <button class="heart-btn" aria-label="Add to wishlist">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                </div>
-                            </div>
+                            <button class="heart-btn" aria-label="Add to wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
-                    {% empty %}
-                        <div class="empty-state">
-                            <p>No products available.</p>
-                        </div>
-                    {% endfor %}
+                    </div>
                 </div>
-            </section>
+                {% endfor %}
+            </div>
+        </section>
+        {% empty %}
+        <!-- Fallback: Show all products if no categories exist -->
+        <section class="artist-section">
+            <div class="section-title-bar">
+                <h2>All Products</h2>
+                <a href="{% url 'product_lists' %}" class="view-all-btn">View More</a>
+            </div>
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card" data-product-id="{{ product.id }}"
+                    data-category-id="{{ product.category.id|default:'0' }}">
+                    <div class="product-img-wrapper">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                        <img src="{% static 'images/product-placeholder.jpg' %}" alt="Product Image">
+                        {% endif %}
 
+                        {% if product.category %}
+                        <div class="category-badge">{{ product.category.name }}</div>
+                        {% endif %}
 
-      
+                        {% if product.influencer %}
+                        <div class="promoted-badge">PROMOTED BY {{
+                            product.influencer.get_full_name|default:product.influencer.username|upper }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="product-details">
+                        <h3 class="product-title">{{ product.name }}</h3>
+
+                        {% if product.description %}
+                        <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                        {% endif %}
+
+                        {% if product.size %}
+                        <div class="product-size-info">
+                            <i class="fas fa-ruler-combined"></i>
+                            <span>Size: {{ product.size }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if product.rating %}
+                        <div class="rating">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= product.rating %} <span class="star filled">★</span>
+                                {% else %}
+                                <span class="star">☆</span>
+                                {% endif %}
+                                {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="product-footer">
+                            <span class="product-price">₹{{ product.price }}</span>
+                            <button class="heart-btn" aria-label="Add to wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <p>No products available.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+
         <!-- Instagram Reels Section -->
         <section class="video-shorts-section">
             <div class="section-header">
-                <h2 class="section-title"> Reels</h2>
-                <p class="section-description">Watch and purchase  from our top influencers</p>
+                <h2 class="section-title">Instagram Reels</h2>
+                <p class="section-description">Watch engaging videos from our top influencers</p>
             </div>
 
             {% if reels_videos %}
@@ -3637,7 +3847,7 @@
                         {% endif %}
                     </a>
 
-                    
+                    <!-- Add to Cart / Buy Now Bar -->
                     {% if product %}
                     <a href="{% url 'view_influencer_products' product.influencer.id %}"
                         class="reel-add-to-cart-bar buy-now-btn">
@@ -3645,11 +3855,10 @@
                     </a>
                     {% else %}
                     <div class="reel-add-to-cart-bar disabled" style="opacity: 0.5; cursor: not-allowed;">
-                         <a href="javascript:void(0);" class="video-shorts-action-btn video-shorts-buy"
-                                id="video-shorts-buy-btn">
-                                <i class="fas fa-shopping-cart"></i> Buy Now
-                            </a>
-                        
+                        <a href="javascript:void(0);" class="video-shorts-action-btn video-shorts-buy"
+                            id="video-shorts-buy-btn">
+                            <i class="fas fa-shopping-cart"></i> Buy Now
+                        </a>
                     </div>
                     {% endif %}
                     {% endwith %}
@@ -3676,24 +3885,53 @@
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
+                        <div class="video-shorts-player">
+                            <div class="video-shorts-content">
+                                <div class="video-shorts-video-container">
+                                    <video class="video-shorts-video" muted playsinline controls></video>
+                                    <div class="video-shorts-overlay">
+                                        <div class="video-shorts-header">
+                                            <div class="video-shorts-title"></div>
+                                            <button class="video-shorts-close">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div class="video-shorts-product-info">
+                                            <h3 class="video-shorts-product-name"></h3>
+                                            <p class="video-shorts-influencer"></p>
+                                            <p class="video-shorts-description"></p>
+                                        </div>
+                                        <div class="video-shorts-products"></div>
+                                        <div class="video-shorts-actions">
+                                            <a href="javascript:void(0);"
+                                                class="video-shorts-action-btn video-shorts-like">
+                                                <i class="fas fa-heart"></i> <span class="like-count"></span>
+                                            </a>
+                                            <a href="javascript:void(0);"
+                                                class="video-shorts-action-btn video-shorts-share">
+                                                <i class="fas fa-share"></i> Share
+                                            </a>
+                                            <a href="javascript:void(0);"
+                                                class="video-shorts-action-btn video-shorts-buy"
+                                                id="video-shorts-buy-btn">
+                                                <i class="fas fa-shopping-cart"></i> Buy Now
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="video-shorts-pagination">
+                                        <div class="video-shorts-pagination-dot active"></div>
+                                        <div class="video-shorts-pagination-dot"></div>
+                                        <div class="video-shorts-pagination-dot"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="video-shorts-product-info">
                             <h3 class="video-shorts-product-name"></h3>
                             <p class="video-shorts-influencer"></p>
                             <p class="video-shorts-description"></p>
                         </div>
                         <div class="video-shorts-products"></div>
-                        <div class="video-shorts-actions">
-                            <a href="javascript:void(0);" class="video-shorts-action-btn video-shorts-like">
-                                <i class="fas fa-heart"></i> <span class="like-count"></span>
-                            </a>
-                            <a href="javascript:void(0);" class="video-shorts-action-btn video-shorts-share">
-                                <i class="fas fa-share"></i> Share
-                            </a>
-                            <a href="javascript:void(0);" class="video-shorts-action-btn video-shorts-buy"
-                                id="video-shorts-buy-btn">
-                                <i class="fas fa-shopping-cart"></i> Buy Now
-                            </a>
-                        </div>
                     </div>
                     <div class="video-shorts-pagination">
                         <div class="video-shorts-pagination-dot active"></div>
