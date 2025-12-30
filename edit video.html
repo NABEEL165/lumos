@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Video - Lumoskart</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root {
+            --primary-black: #000000;
+            --secondary-black: #1a1a1a;
+            --dark-grey: #333333;
+            --medium-grey: #666666;
+            --light-grey: #cccccc;
+            --bg-grey: #f5f5f5;
+            --white: #ffffff;
+            --border-grey: #e0e0e0;
+            --primary-blue: #007bff;
+            --success-green: #28a745;
+            --warning-orange: #ffc107;
+            --danger-red: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-grey);
+            background-color: var(--bg-grey);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: var(--primary-black);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-item a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-item a:hover {
+            background-color: var(--dark-grey);
+        }
+
+        .nav-item a.active {
+            background-color: var(--white);
+            color: var(--primary-black);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex: 1;
+        }
+
+        .edit-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .edit-header {
+            background-color: var(--secondary-black);
+            color: var(--white);
+            padding: 2rem;
+            border-bottom: 3px solid var(--primary-black);
+        }
+
+        .edit-header h2 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .edit-content {
+            padding: 2rem;
+        }
+
+        .video-preview {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .video-player {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .video-player video {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-thumbnail-preview {
+            width: 200px;
+            text-align: center;
+        }
+
+        .thumbnail-img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-grey);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-grey);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .form-control-file {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-grey);
+            border-radius: 4px;
+            background-color: var(--white);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: var(--medium-grey);
+            color: var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: #555555;
+        }
+
+        .products-section {
+            margin-top: 2rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .product-item {
+            border: 1px solid var(--border-grey);
+            border-radius: 4px;
+            padding: 1rem;
+            background-color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .product-item:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+
+        .product-item input {
+            margin-right: 0.5rem;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin: 0;
+            text-align: center;
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 2rem;
+            color: var(--medium-grey);
+            font-style: italic;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--primary-black);
+            color: var(--white);
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--light-grey);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--white);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .container {
+                margin: 1rem auto;
+                padding: 0 1rem;
+            }
+
+            .edit-header {
+                padding: 1.5rem;
+            }
+
+            .edit-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .edit-content {
+                padding: 1.5rem;
+            }
+
+            .video-preview {
+                flex-direction: column;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0.75rem;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            .edit-header {
+                padding: 1.25rem;
+            }
+
+            .edit-header h2 {
+                font-size: 1.35rem;
+            }
+
+            .edit-content {
+                padding: 1rem;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="{% static 'accounts/images/lumoskart-logo.png' %}" alt="Lumoskart Logo" style="height: 32px; width: auto; margin-right: 10px;">
+            </a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="{% url 'influencer_dashboard' %}">Dashboard</a></li>
+                <li class="nav-item"><a href="{% url 'manage_videos' %}">Manage Videos</a></li>
+                <li class="nav-item"><a href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="edit-card">
+            <div class="edit-header">
+                <h2>Edit Video</h2>
+            </div>
+
+            <div class="edit-content">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="video-preview">
+                        <div class="video-player">
+                            <h4>Current Video</h4>
+                            <video controls>
+                                <source src="{{ video.video_file.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        
+                        <div class="video-thumbnail-preview">
+                            <h4>Thumbnail</h4>
+                            {% if video.thumbnail %}
+                                <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="thumbnail-img">
+                            {% else %}
+                                <div class="thumbnail-img" style="background-color: var(--bg-grey); display: flex; align-items: center; justify-content: center; height: 150px;">
+                                    <i class="fas fa-image fa-2x" style="color: var(--medium-grey);"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="title">Video Title</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ video.title }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4">{{ video.description }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="thumbnail">Update Thumbnail (Optional)</label>
+                        <input type="file" class="form-control-file" id="thumbnail" name="thumbnail" accept="image/*">
+                        <small class="form-text text-muted">Upload JPG, PNG, or GIF files (max 5MB)</small>
+                    </div>
+                    
+                    <div class="products-section">
+                        <h4>Tag Products to Video</h4>
+                        <p>Select products you want to feature in this video:</p>
+                        
+                        {% if products %}
+                            <div class="products-grid">
+                                {% for product in products %}
+                                    <div class="product-item">
+                                        <input type="checkbox" id="product_{{ product.id }}" name="products" value="{{ product.id }}" 
+                                            {% if product.id in selected_products %}checked{% endif %}>
+                                        <label for="product_{{ product.id }}">
+                                            {% if product.image %}
+                                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                                            {% endif %}
+                                            <p class="product-name">{{ product.name }}</p>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="no-products">
+                                <p>You don't have any products yet. <a href="{% url 'add_product' %}">Add your first product</a></p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-primary">Update Video</button>
+                        <a href="{% url 'manage_videos' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Lumoskart. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
